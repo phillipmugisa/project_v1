@@ -1,0 +1,211 @@
+body {
+    display: grid;
+    inline-size: 90%;
+    justify-content: stretch;
+    align-content: flex-start;
+    gap: 1rem;
+    margin-inline: auto;
+    font-size: .9rem;
+}
+
+.content-area {
+    display: grid;
+    gap: 1rem;
+}
+
+nav {
+    justify-self: flex-start;
+    align-self: flex-start;
+    inline-size: 100%;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+}
+
+nav .left-tabs {
+    display: grid;
+    justify-content: flex-start;
+}
+nav .right-tabs {
+    display: grid;
+    justify-content: flex-end;
+}
+
+nav a {
+    display: grid;
+    place-content: center;
+    padding: .5rem 1rem;
+}
+
+nav a.active {
+    color: rgb(21, 62, 65);
+    border-block-end: 2px solid rgb(21, 62, 65);
+}
+
+
+.auth-form {
+    display: grid;
+    justify-self: center;
+    align-self: center;
+
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    min-inline-size: 30vw;
+    background-color: hsl(208, 100%, 98%);
+    margin-block: 5%;
+}
+
+form {
+    display: grid;
+    gap: 1rem;
+}
+form p:has(input) {
+    display: grid;
+    gap:.5rem;
+}
+form input {
+    inline-size: 100%;
+    border: 1px solid lightgrey;
+    padding: .5rem;
+    font-size: 1rem;
+    display: grid;
+    color: #000;
+}
+
+form input[type="submit"],
+button, .btn.primary {
+    background-color: #000;
+    color: white;
+    padding: .5rem;
+    display: grid;
+    place-content: center;
+}
+.form-area footer {
+    display: grid;
+}
+.form-area footer a {
+    display: grid;
+    justify-self: center;
+    text-align: center;
+    font-size: 1rem;
+    color: rgb(29, 97, 102);
+}
+
+form ul {
+    list-style-type: disc;
+    list-style-position: inside
+}
+
+form ul li,
+form .helptext {
+    color: hsl(184, 55%, 30%);
+}
+
+form .errorlist li {
+    color: hsl(0, 100%, 49%);
+}
+
+.prompt-form {
+    display: grid;
+    justify-self: center;
+
+    padding: 1rem 1.5rem;
+    gap: 1rem;
+    min-inline-size: 30vw;
+    background-color: hsl(208, 100%, 98%);
+}
+
+.pre-list {
+    display: grid;
+    justify-self: center;
+    min-inline-size: 30vw;
+    padding: 1rem 1.5rem;
+}
+.pre-list .body a {
+    display: grid;
+    padding: .5rem .5rem;
+}
+
+a {
+    transition: .3s linear;
+}
+a:hover {
+    color: hsl(184, 55%, 30%);
+}
+
+.split {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+    gap: 1rem;
+}
+
+.split aside {
+    display: grid;
+    gap: 1rem;
+    padding: .25rem;
+    align-content: flex-start;
+}
+
+.split aside .side-list {
+    display: grid;
+    gap: .5rem;
+    align-items: flex-start;
+}
+
+.view-body {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.view-body .view-part {
+    display: grid;
+    gap: .5rem;
+}
+
+.view-part.span-all {
+    display: grid;
+    grid-column: 1/-1;
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.view-body .sub-view-part {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid hsl(0, 1%, 85%);
+}
+
+.view-body .sub-view-part .title{
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.view-body .sub-view-part .value {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.view-part .pre-list {
+    padding-inline: 0;
+}
+
+.list-items {
+    --border-color: hsl(0, 2%, 80%);
+    border: 1px solid var(--border-color);
+    display: grid;
+    gap: 0;
+}
+.list-items > * {
+    border-block-end: 1px solid var(--border-color);
+    border-inline: 2px solid transparent;
+    display: block;
+    padding: .5rem;
+}
+.list-items > *:last-child {
+    border-block-end: none
+}
+
+.list-items > *.active,
+.list-items > *:hover {
+    border-inline-start: 2px solid rgb(21, 62, 65);
+}

@@ -1,0 +1,29 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="split patient-details">
+    <aside>
+        <div class="side-list insurance-brief">
+            <span>Number: {{ insurance.insurance_number }}</span>
+            <span>Name: {{ insurance.family.name }}</span>
+        </div>
+        <div class="side-list">
+            <header>
+                <h4>Family Members</h4>
+            </header>
+            <div class="body list-items">
+                {% for p in family_members %}
+                    <a href="{% url 'admin_app:patient-details' insurance.insurance_number p.patientid %}" class="{% if p.patientid == patient.patientid %} active {% endif %}">{{ p.firstname }} {{ p.middlename }} {{ p.lastname }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+    <div class="form-area">
+        <h3 class="title">{{ patient.firstname }} {{ patient.lastname }} Detials</h3>
+        <form action="{% url 'admin_app:patient-details' insurance.insurance_number patient.patientid %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</div>
+{% endblock %}

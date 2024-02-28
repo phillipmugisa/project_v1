@@ -1,0 +1,24 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="prompt-form form-area">
+    <header>
+        <h3 class="title">Enter Insurance Number or Family Name</h3>
+    </header>
+    <form action="" method="post">
+        {% csrf_token %}
+        <input type="text" name="search_keyword" required>
+        <input type="submit" value="Search">
+    </form>
+    <button>Scan Barcode</button>
+</div>
+<div class="main-lists pre-list" style="display: grid; gap: 1rem">
+    <header>
+        <h3 class="title">Current Family Insurances</h3>
+    </header>
+    <div class="body list-items">
+    {% for i in insurances %}
+        <a href="{% url 'admin_app:insurance-details' i.insurance_number %}">{{ i.insurance_number }} - {{ i.family.name }}</a>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}

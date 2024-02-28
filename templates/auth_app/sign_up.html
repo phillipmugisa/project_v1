@@ -1,0 +1,16 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="auth-form form-area">
+    <header>
+        <h3 class="title">Sign Up Form</h3>
+    </header>
+    <form action="{% url 'auth_app:signup' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Sign Up">
+    </form>
+    <footer>
+        <a href="{% url 'auth_app:signin' %}">Already have an account</a>
+    </footer>
+</div>
+{% endblock %}

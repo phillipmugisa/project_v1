@@ -1,0 +1,36 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="split instance-details">
+    <aside>
+        <div class="side-list insurance-brief">
+            <span>Number: {{ insurance.insurance_number }}</span>
+            <span>Family Name: {{ insurance.family.name }}</span>
+        </div>
+        <div class="side-list side-cta">
+            <a class="btn primary" href="">Credit Account</a>
+            <a class="btn primary" href="">Debit Account</a>
+            <a class="btn primary" href="">Suspend Account</a>
+        </div>
+    </aside>
+    <div class="view-body">
+        <div class="view-part span-all">
+            <div class="sub-view-part">
+                <span class="title">Credit</span>
+                <span class="value">{{ insurance.credit }}</span>
+            </div>
+            <div class="sub-view-part">
+                <span class="title">Beneficians</span>
+                <span class="value">{{ family_members|length }}</span>
+            </div>
+        </div>
+        <div class="view-part span-1">
+            <h4>Family Members</h4>
+            <div class="side-list list-items">
+                {% for p in family_members %}
+                    <a href="{% url 'admin_app:patient-details' insurance.insurance_number p.patientid %}">{{ p.firstname }} {{ p.middlename }} {{ p.lastname }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
