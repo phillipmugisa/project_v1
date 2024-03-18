@@ -1,7 +1,0 @@
-{% block content %}
-    {% if instance.moa_document %}
-    <iframe src="/media/{{instance.moa_document}}" frameborder="0" style="min-height: 60vh;min-width: 50vw;"></iframe>
-    {% else %}
-    <h2 class="text danger">No Document found</h2>
-    {% endif %}
-{% endblock %}
