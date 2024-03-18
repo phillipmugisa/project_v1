@@ -8,17 +8,39 @@
     <title>Document</title>
     <link rel="stylesheet" href="{% static 'css/utils.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/table.min.css' %}">
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.5.1.js' %}"></script>
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
 </head>
-<body>
+<body id="app-wrapper">
     {% if request.user.is_authenticated %}
     <nav>
         <div class="left-tabs">
+            <a href="{% url 'admin_app:home' %}">
+                <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
+            </a>
             <a href="{% url 'admin_app:home' %}" class="active">Home</a>
         </div>
         <div class="right-tabs">
             <a href="{% url 'auth_app:logout' %}">Logout</a>
         </div>
     </nav>
+    {% endif %}
+
+    
+    {% if messages %}
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            <div class="message error-area">
+                <p>{{ message }}</p>
+            </div>
+        {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            <div class="message success-area">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+    {% endfor %}
     {% endif %}
 
     <section class="content-area">

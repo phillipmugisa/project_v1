@@ -1,0 +1,31 @@
+{% block content %}
+<div class="view-part make-payment" style="grid-column: 1/-1;">
+    <header>
+        <h3>Use credit on {{ patient.firstname }} {{ patient.lastname }}</h3>
+    </header>
+    <form hx-post="{% url 'admin_app:patient-make-payments' patient.patientno %}" hx-indicator=".loader" hx-target="#app-wrapper" method="post" class="short emphasized">
+        <div class="form-brief">
+            <h4>Insurance Access Type: {{ member.access_type.name }}</h4>
+            {% if member.access_type.max_access_amount%}
+            <h3 style="color: blue;">You can only access <span>{{ member.access_type.max_access_amount }}</span></h3>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="Services" class="area-title">Select Services</label>
+            <div class="input-list">
+                {% for service in services %}
+                <div class="input-group">
+                    <input type="checkbox" name="desired_service_{{for_loop.counter}}" value="{{service.id}}" id="desired_service_{{for_loop.counter}}">
+                    <label for="desired_service_{{for_loop.counter}}" style="gap: .5rem;">
+                        <span>{{service.name}}</span>
+                        <span style="font-weight: 600;">({{service.price}})</span>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <input type="submit" value="Use credit" name="modify_patient_insurance">
+        <!-- <input type="submit" value="Save Without Verification" name="admin_bypass"> -->
+    </form>
+</div>
+{% endblock %}

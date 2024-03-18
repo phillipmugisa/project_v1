@@ -1,9 +1,17 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from datetime import datetime
+import uuid, os
+
+
+def get_file_path(instance, filename):
+    ext = filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}"[:50] + f".{ext}"
+    return os.path.join(f"moa/{instance.family.name}/", filename)
 
 class Patient(models.Model):
     patientid = models.IntegerField(db_column='PatientID')
-    patientno = models.CharField(db_column='PatientNo', max_length=20)
+    patientno = models.CharField(db_column='PatientNo', max_length=20, unique=True)
     nationalidno = models.CharField(db_column='NationalIDNo', max_length=20, blank=True, null=True)
     referenceno = models.CharField(db_column='ReferenceNo', max_length=20, blank=True, null=True)
     firstname = models.CharField(db_column='FirstName', max_length=20, blank=True, null=True)
@@ -70,18 +78,109 @@ class Patient(models.Model):
     knowaboutservice = models.CharField(db_column='KnowAboutService', max_length=100, blank=True, null=True)
     tinnumber = models.CharField(db_column='TINNumber', max_length=20, blank=True, null=True)
 
+    
+    def __str__(self):
+        return f"{self.firstname} {self.lastname}"
+
 class PatientAddress(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.DO_NOTHING)
+    patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
     address = models.CharField(db_column='Address', max_length=100, blank=True, null=True)
 
 class Family(models.Model):
-    name = models.CharField(verbose_name="Family Name", max_length=256)
+    name = models.CharField(verbose_name="Family Name", max_length=256, null=False, blank=False)
+
+    def __str__(self):
+        return f"{self.name}"
 
 class FamilyMember(models.Model):
-    family = models.ForeignKey(Family, on_delete=models.DO_NOTHING)
-    patient = models.OneToOneField(Patient, on_delete=models.DO_NOTHING)
+    # class RelationshipOption(models.TextChoices):
+    #     principle = _("principle"), _("principle")
+    #     child = _("child"), _("child")
+    #     spouse = _("spouse"), _("spouse")
+
+    # default_rel = RelationshipOption.principle       
+    # class AccessTypeOption(models.TextChoices):
+    #     Premium = _("Premium"), _("Premium")
+    #     Gold = _("Gold"), _("Gold")
+    #     Silver = _("Silver"), _("Silver")
+    #     Basic = _("Basic"), _("Basic")
+
+    # default_access_type = RelationshipOption.principle
+
+    family = models.ForeignKey(Family, on_delete=models.SET_NULL, null=True, blank=True)
+    patient = models.OneToOneField(Patient, on_delete=models.SET_NULL, null=True, unique=True)
+    status = models.BooleanField(default=False)
+    relationship = models.ForeignKey(to="RelationshipType", on_delete=models.SET_NULL, null=True)
+    access_type = models.ForeignKey(to="InsuranceAccessType", on_delete=models.SET_NULL, null=True)
+    scheme_no = models.CharField(_("Scheme Number"), max_length=256, null=True, blank=True)
+
+    moa_document = models.FileField(
+        verbose_name=_("MOA Document"),
+        upload_to=get_file_path,
+        null=True, blank=True
+    )
+
+    def save(self, *args, **kwargs):
+        # if not self.pk and not self.relationship:
+        #     self.relationship = self.default_rel
+        # if not self.pk and not self.access_type:
+        #     self.access_type = self.default_access_type
+
+        # set scheme number
+        if not self.scheme_no:
+            self.scheme_no = self.generate_scheme_no()
+        super().save(*args, **kwargs)
+
+    def generate_scheme_no(self):
+        sn = ""
+        if self.patient.genderid:
+            sn = sn + f"{self.patient.genderid}/"
+        if self.patient.nationalidno:
+            sn = sn + f"{self.patient.nationalidno}"
+            
+        sn = sn + f"{self.patient.birthdate.year}/{datetime.now().strftime("%Y-%m-%d")}"
+        return sn
+
+
+    def __str__(self):
+        return f"({self.family}) {self.patient.firstname} {self.patient.lastname}"
+
+class InsuranceAccessType(models.Model):
+    name = models.CharField(verbose_name="Name", max_length=256)
+    max_access_amount = models.DecimalField(verbose_name="Maximum Usable Amount", decimal_places=2, max_digits=12, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class RelationshipType(models.Model):
+    name = models.CharField(verbose_name="Name", max_length=256)
+    max_access_amount = models.DecimalField(verbose_name="Maximum Usable Amount", decimal_places=2, max_digits=12, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+class Service(models.Model):
+    name = models.CharField(verbose_name="Family Name", max_length=256)
+    price = models.DecimalField(verbose_name="Price of service", decimal_places=2, max_digits=12, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+class Transaction(models.Model):
+    service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
+    patient = models.ForeignKey(to=Patient, on_delete=models.SET_NULL, null=True)
+    amount_user = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)
+    completed = models.BooleanField(default=False)
+    authorised = models.BooleanField(default=False)
 
 class FamilyInsurance(models.Model):
     insurance_number = models.CharField(db_column='Insurance Number', max_length=100, blank=True, null=True)
-    family = models.OneToOneField(to=Family, on_delete=models.DO_NOTHING)
+    family = models.OneToOneField(to=Family, on_delete=models.SET_NULL, null=True)
     credit = models.DecimalField(verbose_name="Credit On Account", decimal_places=2, max_digits=12, blank=True, null=True)
+    status = models.BooleanField(default=True)
+
+    def __str__(self):
+        if not self.family:
+            return self.insurance_number    
+        return f"{self.family.name} {self.insurance_number}"
+

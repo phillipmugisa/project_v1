@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +31,7 @@ SECRET_KEY = 'django-insecure-p38^!6q4@!mv+s^vg@ke)ps+$+kb^!d9@nt-j$6i3bhrrw0d=(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -41,7 +46,9 @@ INSTALLED_APPS = [
     "manager",
     "clinicMas",
     "auth_app",
-    "admin_app"
+    "admin_app",
+
+    "django_htmx",
 ]
 
 MIDDLEWARE = [
@@ -52,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -83,7 +91,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+        "NAME": "mydatabase.sqlite3",
     },
     "clinic": {
         "ENGINE": "mssql",
@@ -140,9 +148,26 @@ STATICFILES_DIRS = [
 ]
 
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "auth_app.User"
+
+CSRF_TRUSTED_ORIGINS = ['https://6595-102-134-149-124.ngrok-free.app']
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = os.environ.get("RESPONSE_EMAIL", None)
+EMAIL_HOST_PASSWORD = os.environ.get("RESPONSE_EMAIL_PASSWORD", None)
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = os.environ.get("RESPONSE_EMAIL", None)
+
+SUPPORT_EMAIL=os.environ.get("SUPPORT_EMAIL", None)

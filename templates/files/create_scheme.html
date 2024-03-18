@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../static/css/utils.css">
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    
+    <script src="../../static/js/jquery-3.5.1.js"></script>
+    <script src="../../static/js/jquery.dataTables.min.js"></script>
+</head>
+<body id="app-wrapper" class="grid">
+    <header id="app-header">
+        <nav class="grid">
+            <div class="tabs left-tabs grid">
+                <a href="" class="logo">
+                    <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
+                </a>
+                <a class="btn tab" href="">Home</a>
+                <a class="btn tab" href="">Schemes</a>
+                <a class="btn tab" href="">Patients</a>
+                <a class="btn tab" href="">Services</a>
+            </div>
+            <div class="tabs right-tabs grid">
+                <a class="tab btn btn-primary" href="">Logout</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="search-area with-extra-cta grid">
+            <div class="form-area grid">
+                <form action="" class="grid">
+                    <label for="search-area">Enter Scheme Name/Number:</label>
+                    <input type="text" name="" id="search-area">
+                    <input type="submit" value="Search" class="btn btn-primary">
+                </form>
+                <button class="btn btn-primary">Scan Barcode</button>
+            </div>
+            <div class="quick-links grid">
+                <a class="link" href="">Create Scheme</a>
+                <a class="link" href="">View Reports</a>
+            </div>
+        </div>
+        <section class="grid with-form" id="create_scheme">
+            <header>
+                <h3 class="title">Create a new scheme</h3>
+            </header>
+            <form action="" method="post">
+                <div class="group">
+                    <label for="">Name</label>
+                    <input type="text">
+                </div>
+                <div class="group">
+                    <label for="">Credit</label>
+                    <input type="text">
+                </div>
+                <input type="submit" value="Save">
+            </form>
+        </section>
+    </main>
+</body>
+</html>

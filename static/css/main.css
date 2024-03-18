@@ -1,11 +1,14 @@
+:root {
+    --primary-color: hsl(189, 73%, 48%);
+}
 body {
     display: grid;
-    inline-size: 90%;
+    inline-size: 95%;
     justify-content: stretch;
     align-content: flex-start;
     gap: 1rem;
     margin-inline: auto;
-    font-size: .9rem;
+    font-size: 1rem;
 }
 
 .content-area {
@@ -24,10 +27,14 @@ nav {
 nav .left-tabs {
     display: grid;
     justify-content: flex-start;
+    grid-auto-flow: column;
+    align-items: center;
 }
 nav .right-tabs {
     display: grid;
     justify-content: flex-end;
+    grid-auto-flow: column;
+    align-items: center;
 }
 
 nav a {
@@ -36,8 +43,10 @@ nav a {
     padding: .5rem 1rem;
 }
 
-nav a.active {
-    color: rgb(21, 62, 65);
+nav a.active,
+nav a:not(:has(img)):hover {
+    background-color: rgb(21, 62, 65);
+    color: white;
     border-block-end: 2px solid rgb(21, 62, 65);
 }
 
@@ -50,10 +59,21 @@ nav a.active {
     padding: 1rem 1.5rem;
     gap: 1rem;
     min-inline-size: 30vw;
-    background-color: hsl(208, 100%, 98%);
+    background-color: var(--primary-color);
     margin-block: 5%;
 }
+.auth-form header {
+    display: grid;
+    align-content: flex-start;
+    justify-content: center;
+    gap: .5rem;
+}
 
+.horizontal {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+}
 form {
     display: grid;
     gap: 1rem;
@@ -69,16 +89,45 @@ form input {
     font-size: 1rem;
     display: grid;
     color: #000;
+    background-color: white;
 }
-
+form input[type="checkbox"] {
+    padding: 5px;
+}
 form input[type="submit"],
-button, .btn.primary {
-    background-color: #000;
+button, .btn {
     color: white;
     padding: .5rem;
     display: grid;
     place-content: center;
+    transition: all .3s linear;
+    border: none;
+    outline: transparent;
+    cursor: pointer;
+    background-color: #000;
 }
+
+.btn.primary {
+    background-color: #000;
+}
+.btn.success {
+    background-color: rgb(24, 187, 59);
+}
+.btn.danger {
+    background-color: red;
+}
+.text.danger {
+    color: red;
+}
+
+
+form input[type="submit"]:hover,
+button:hover,
+.btn.primary:hover {
+    background-color: #00b9f1;
+}
+
+
 .form-area footer {
     display: grid;
 }
@@ -87,12 +136,32 @@ button, .btn.primary {
     justify-self: center;
     text-align: center;
     font-size: 1rem;
-    color: rgb(29, 97, 102);
+    color: rgb(217, 255, 4);
 }
 
 form ul {
     list-style-type: disc;
     list-style-position: inside
+}
+
+.view-body form p label {
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--primary-color)
+}
+form > p {
+    display: grid;
+    gap: .5rem;
+}
+
+form p:has(input[type="checkbox"]) {
+    display: flex;
+    gap: .5rem;
+}
+
+form input[type="checkbox"] {
+    inline-size: 20px;
+    aspect-ratio: 1;
 }
 
 form ul li,
@@ -103,15 +172,52 @@ form .helptext {
 form .errorlist li {
     color: hsl(0, 100%, 49%);
 }
-
+form.split {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+form.short {
+    width: 40%;
+}
+form.emphasized {
+    /* background-color: #322760;
+    padding: 5rem; */
+}
+form.split input {
+    block-size: 60px;
+    border: 1px solid grey;
+    outline: transparent;
+}
+form.split input:hover,
+form.split input:focus {
+    background-color: beige;
+}
+form.split input[type="submit"] {
+    block-size: 50px;
+    grid-column: 1/-1;
+}
+form select {
+    width: 100%;
+}
 .prompt-form {
     display: grid;
-    justify-self: center;
 
+    padding: 0;
+    /* gap: 1rem ; */
+    inline-size: 100%;
+    background-color: var(--primary-color);
+    justify-content: flex-start;
+}
+
+.prompt-form .outer-group {
+    display: flex;
+}
+.prompt-form form {
     padding: 1rem 1.5rem;
-    gap: 1rem;
-    min-inline-size: 30vw;
-    background-color: hsl(208, 100%, 98%);
+    block-size: 100%;
+}
+.prompt-form .outer-group form {
+    padding-inline-end: 0.5rem;
 }
 
 .pre-list {
@@ -134,8 +240,9 @@ a:hover {
 
 .split {
     display: grid;
-    grid-template-columns: 1fr 4fr;
+    grid-template-columns: 1fr 5fr;
     gap: 1rem;
+    min-height: 90vh;
 }
 
 .split aside {
@@ -153,8 +260,11 @@ a:hover {
 
 .view-body {
     display: grid;
+    align-content: flex-start;
+    padding: .5rem;
     gap: 1rem;
     grid-template-columns: repeat(3, 1fr);
+    background-color: #F8F9FB;
 }
 
 .view-body .view-part {
@@ -165,14 +275,16 @@ a:hover {
 .view-part.span-all {
     display: grid;
     grid-column: 1/-1;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
 }
 
 .view-body .sub-view-part {
     display: grid;
     gap: 1rem;
+    grid-auto-flow: column;
     padding: 1rem;
-    border: 1px solid hsl(0, 1%, 85%);
+    border: 2px solid var(--primary-color);
+    align-items: baseline;
 }
 
 .view-body .sub-view-part .title{
@@ -208,4 +320,146 @@ a:hover {
 .list-items > *.active,
 .list-items > *:hover {
     border-inline-start: 2px solid rgb(21, 62, 65);
+}
+
+
+.status {
+    padding: .25rem 1rem;
+    border-radius: 50px;
+}
+.status.active {
+    background-color: rgb(24, 187, 59);
+    color: white;
+}
+.status.suspended {
+    background-color: red;
+    color: white;
+}
+
+.message {
+    display: grid;
+    padding: .5rem 1rem;
+    place-content: center;
+    text-align: center;
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+}
+.error-area {
+    background-color: red;
+}
+.success-area {
+    background-color: rgb(24, 187, 59);;
+}
+
+.table-area {
+    margin-block: 0 2.5%;
+}
+.table-area table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.table-area td, .table-area th {
+    border: 1px solid #ddd;
+    padding: .5rem;
+}
+
+.table-area tr:nth-child(even){background-color: #f2f2f2;}
+
+.table-area tr:hover {background-color: hsla(0, 0%, 90%, 0.774);}
+
+.table-area th {
+    padding: .5rem;
+    text-align: left;
+    background-color: var(--primary-color);
+    color: black;
+}
+
+td .btn,
+td input[type="submit"] {
+    padding: .25rem 1rem;
+    border-radius: 50px;
+    max-inline-size: 15vw;
+}
+
+.insurance-brief {
+    padding: .5rem;
+    background-color: beige;
+}
+
+
+.loader {
+    display: none;
+    border: 4px solid #f3f3f3; /* Light grey */
+    border-top: 4px solid #000000; /* Blue */
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 2s linear infinite;
+    /* position: fixed;
+    top: 50%;
+    left: 50%; */
+    /* margin-top: -60px;
+    margin-left: -60px; */
+    z-index: 9999;
+}
+.loader.fill {
+    display: none;
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #000000; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -60px;
+    margin-left: -60px;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.htmx-indicator{
+    display: inline-block;
+    transition: opacity 500ms ease-in;
+}
+.htmx-indicator.fill {
+    display: block;
+}
+.htmx-request .htmx-indicator{
+    opacity:1
+}
+.htmx-request.htmx-indicator{
+    opacity:1
+}
+
+form:has(.form-group) {
+    display: grid;
+    gap: 1rem;
+}
+.form-group {
+    display: grid;
+    gap: 1rem;
+    background-color: hsla(184, 68%, 73%, 0.726);
+    padding: 1rem;
+    border-radius: 5px;
+}
+.form-group .area-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+.input-list {
+    display: grid;
+    gap: 1rem;
+}
+.input-group {
+    display: grid;
+    justify-content: flex-start;
+    grid-auto-flow: column;
+    gap: 1rem;
 }

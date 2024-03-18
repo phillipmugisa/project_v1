@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../static/css/utils.css">
+    <link rel="stylesheet" href="../../static/css/styles.css">
+    
+    <script src="../../static/js/jquery-3.5.1.js"></script>
+    <script src="../../static/js/jquery.dataTables.min.js"></script>
+</head>
+<body id="app-wrapper" class="grid">
+    <header id="app-header">
+        <nav class="grid">
+            <div class="tabs left-tabs grid">
+                <a href="" class="logo">
+                    <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
+                </a>
+                <a class="btn tab" href="">Home</a>
+                <a class="btn tab" href="">Schemes</a>
+                <a class="btn tab" href="">Patients</a>
+                <a class="btn tab" href="">Services</a>
+            </div>
+            <div class="tabs right-tabs grid">
+                <a class="tab btn btn-primary" href="">Logout</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <div class="page-brief">
+            <p>Kawala Traders Scheme</p>
+
+            <div class="actions">
+                <a href="" class="btn btn-success">Credit account</a>
+                <a href="" class="btn btn-danger">Suspend Account</a>
+            </div>
+        </div>
+        <section class="grid summaries">
+            <header>
+                <h3 class="title">Summaries</h3>
+            </header>
+            <div class="area-body grid">
+                <div class="summary-card">
+                    <p class="title">Total Credit</p>
+                    <div class="body">
+                        <p class="stats">1,000,0000</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <p class="title">Total Debit</p>
+                    <div class="body">
+                        <p class="stats">800,0000</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <p class="title">Patients</p>
+                    <div class="body">
+                        <p class="stats">100</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="search-area content-search grid">
+            <div class="form-area grid">
+                <form action="" class="grid">
+                    <label for="search-area">Enter Patient Name/Number:</label>
+                    <input type="text" name="" id="search-area">
+                    <input type="submit" value="Search" class="btn btn-primary">
+                </form>
+            </div>
+        </div>
+        <section class="grid table-area" id="schemes">
+            <header>
+                <h3 class="title">Scheme Members</h3>
+            </header>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Count</th>
+                        <th>Patiend No.</th>
+                        <th>Name</th>
+                        <th>Access Type</th>
+                        <th>Relationship</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Kawala Traders</td>
+                        <td>Alex Mukisa</td>
+                        <td>100000</td>
+                        <td>Active</td>
+                        <td>
+                            <p class="text text-success">Active</p>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-access btn-table-actions">Details</a>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-danger btn-table-actions">Deactivate</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Masaka Travellers</td>
+                        <td>Mukulu Mark</td>
+                        <td>50000</td>
+                        <td>Active</td>
+                        <td>
+                            <p class="text text-danger">Deactivated</p>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-access btn-table-actions">Details</a>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-danger btn-table-actions">Deactivate</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>Kawala Traders</td>
+                        <td>Alex Mukisa</td>
+                        <td>100000</td>
+                        <td>Active</td>
+                        <td>
+                            <p class="text text-success">Active</p>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-access btn-table-actions">Details</a>
+                        </td>
+                        <td>
+                            <a href="" class="btn btn-danger btn-table-actions">Deactivate</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <aside class="grid">
+        <div class="aside-area">
+            <h4 class="title">Recent Transactions</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <a href="">
+                        
+                    <tr>
+                        <td>123</td>
+                        <td>50,000</td>
+                        <td>12/05/2022</td>
+                    </tr>
+                    </a>
+                    <tr>
+                        <td>123</td>
+                        <td>50,000</td>
+                        <td>12/05/2022</td>
+                    </tr>
+                    <tr>
+                        <td>123</td>
+                        <td>50,000</td>
+                        <td>12/05/2022</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="aside-area">
+            <h4 class="title">Reports</h4>
+            <div class="body">
+                <a href="" class="report-triggers link">Patients reports</a>
+                <a href="" class="report-triggers link">Transactions reports</a>
+            </div>
+        </div>
+    </aside>
+</body>
+</html>

@@ -13,3 +13,9 @@ class PatientAddressForm(ModelForm):
     class Meta:
         model = ManagerModels.PatientAddress
         fields = "__all__"
+    
+
+class FamilyMemberForm(ModelForm):
+    class Meta:
+        model = ManagerModels.FamilyMember
+        fields = "__all__"
