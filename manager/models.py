@@ -1,13 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime
-import uuid, os
+from django.utils import timezone
+import uuid, os, random
 
 
 def get_file_path(instance, filename):
     ext = filename.split(".")[-1]
     filename = f"{uuid.uuid4()}"[:50] + f".{ext}"
-    return os.path.join(f"moa/{instance.family.name}/", filename)
+    return os.path.join(f"moa/{instance.scheme.name}/", filename)
 
 class Patient(models.Model):
     patientid = models.IntegerField(db_column='PatientID')
@@ -77,6 +78,14 @@ class Patient(models.Model):
     lastaccountactiondate = models.DateTimeField(db_column='LastAccountActionDate', blank=True, null=True)
     knowaboutservice = models.CharField(db_column='KnowAboutService', max_length=100, blank=True, null=True)
     tinnumber = models.CharField(db_column='TINNumber', max_length=20, blank=True, null=True)
+    
+    created_on = models.DateField(_("Created on"), default=timezone.now)
+    updated_on = models.DateField(_("Created on"), null=True, blank=True)
+
+    
+    def save(self, *args, **kwargs):
+        self.updated_on = datetime.now()
+        super().save(*args, **kwargs)       
 
     
     def __str__(self):
@@ -86,32 +95,12 @@ class PatientAddress(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True)
     address = models.CharField(db_column='Address', max_length=100, blank=True, null=True)
 
-class Family(models.Model):
-    name = models.CharField(verbose_name="Family Name", max_length=256, null=False, blank=False)
-
-    def __str__(self):
-        return f"{self.name}"
-
 class FamilyMember(models.Model):
-    # class RelationshipOption(models.TextChoices):
-    #     principle = _("principle"), _("principle")
-    #     child = _("child"), _("child")
-    #     spouse = _("spouse"), _("spouse")
-
-    # default_rel = RelationshipOption.principle       
-    # class AccessTypeOption(models.TextChoices):
-    #     Premium = _("Premium"), _("Premium")
-    #     Gold = _("Gold"), _("Gold")
-    #     Silver = _("Silver"), _("Silver")
-    #     Basic = _("Basic"), _("Basic")
-
-    # default_access_type = RelationshipOption.principle
-
-    family = models.ForeignKey(Family, on_delete=models.SET_NULL, null=True, blank=True)
+    scheme = models.ForeignKey("Scheme", on_delete=models.SET_NULL, null=True, blank=True)
     patient = models.OneToOneField(Patient, on_delete=models.SET_NULL, null=True, unique=True)
     status = models.BooleanField(default=False)
     relationship = models.ForeignKey(to="RelationshipType", on_delete=models.SET_NULL, null=True)
-    access_type = models.ForeignKey(to="InsuranceAccessType", on_delete=models.SET_NULL, null=True)
+    access_type = models.ForeignKey(to="AccessType", on_delete=models.SET_NULL, null=True)
     scheme_no = models.CharField(_("Scheme Number"), max_length=256, null=True, blank=True)
 
     moa_document = models.FileField(
@@ -120,13 +109,11 @@ class FamilyMember(models.Model):
         null=True, blank=True
     )
 
-    def save(self, *args, **kwargs):
-        # if not self.pk and not self.relationship:
-        #     self.relationship = self.default_rel
-        # if not self.pk and not self.access_type:
-        #     self.access_type = self.default_access_type
+    created_on = models.DateField(_("Created on"), default=timezone.now)
+    updated_on = models.DateField(_("Created on"), null=True, blank=True)
 
-        # set scheme number
+    def save(self, *args, **kwargs):
+        self.updated_on = datetime.now()
         if not self.scheme_no:
             self.scheme_no = self.generate_scheme_no()
         super().save(*args, **kwargs)
@@ -143,9 +130,9 @@ class FamilyMember(models.Model):
 
 
     def __str__(self):
-        return f"({self.family}) {self.patient.firstname} {self.patient.lastname}"
+        return f"({self.scheme.name}) {self.patient.firstname} {self.patient.lastname}"
 
-class InsuranceAccessType(models.Model):
+class AccessType(models.Model):
     name = models.CharField(verbose_name="Name", max_length=256)
     max_access_amount = models.DecimalField(verbose_name="Maximum Usable Amount", decimal_places=2, max_digits=12, blank=True, null=True)
 
@@ -160,27 +147,50 @@ class RelationshipType(models.Model):
         return self.name
 
 class Service(models.Model):
-    name = models.CharField(verbose_name="Family Name", max_length=256)
+    name = models.CharField(verbose_name="Name", max_length=256)
     price = models.DecimalField(verbose_name="Price of service", decimal_places=2, max_digits=12, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
 
 class Transaction(models.Model):
+    reference_no = models.CharField(verbose_name="reference number", max_length=256)
     service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
-    patient = models.ForeignKey(to=Patient, on_delete=models.SET_NULL, null=True)
-    amount_user = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)
+    member = models.ForeignKey(to=FamilyMember, on_delete=models.SET_NULL, null=True)
+    scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True)
+    amount_used = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)
     completed = models.BooleanField(default=False)
     authorised = models.BooleanField(default=False)
+    created_on = models.DateField(_("Created on"), default=timezone.now)
 
-class FamilyInsurance(models.Model):
+    
+    def save(self, *args, **kwargs):
+
+        if not self.reference_no:
+            self.reference_no = f"{random.randint(0,9)}{random.randint(0,9)}{random.randint(0,9)}"
+        super().save(*args, **kwargs)
+
+class Scheme(models.Model):
+    name = models.CharField(verbose_name="Name", max_length=256)
     insurance_number = models.CharField(db_column='Insurance Number', max_length=100, blank=True, null=True)
-    family = models.OneToOneField(to=Family, on_delete=models.SET_NULL, null=True)
     credit = models.DecimalField(verbose_name="Credit On Account", decimal_places=2, max_digits=12, blank=True, null=True)
     status = models.BooleanField(default=True)
+    created_on = models.DateField(_("Created on"), default=timezone.now)
+    updated_on = models.DateField(_("Created on"), null=True, blank=True)
+
+    
+    def save(self, *args, **kwargs):
+        self.updated_on = datetime.now()
+
+        if not self.insurance_number:
+            self.insurance_number = f"{random.randint(0,9)}{random.randint(0,9)}{random.randint(0,9)}"
+        super().save(*args, **kwargs)
+
 
     def __str__(self):
-        if not self.family:
-            return self.insurance_number    
-        return f"{self.family.name} {self.insurance_number}"
+        return f"{self.name} {self.insurance_number}"
 
+
+class log(models.Model):
+    action = models.CharField(verbose_name="actions", max_length=256)
+    updated_on = models.DateField(_("Created on"), null=True, blank=True)

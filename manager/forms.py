@@ -18,4 +18,9 @@ class PatientAddressForm(ModelForm):
 class FamilyMemberForm(ModelForm):
     class Meta:
         model = ManagerModels.FamilyMember
-        fields = "__all__"
+        fields = "__all__"        
+
+class SchemeForm(ModelForm):
+    class Meta:
+        model = ManagerModels.Scheme
+        fields = ["name", "credit", "status"]

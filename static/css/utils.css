@@ -381,6 +381,7 @@ form input[type='submit']:hover {
 table {
     border-collapse: collapse;
     width: 100%;
+    margin-block: 1rem;
 }
 td, th {
     border: 1px solid #ddd;

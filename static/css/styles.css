@@ -175,6 +175,7 @@ form label {
     /* color: var(--link-color); */
     color: white;
     transition: var(--transition);
+    cursor: pointer;
 }
 .quick-links .link:hover {
     /* color: var(--link-hover-color); */
@@ -191,7 +192,8 @@ main div header .title {
     font-weight: bold;
 }
 
-section {
+section,
+#swappable {
     gap: 1rem;
 }
 
@@ -228,7 +230,7 @@ section:last-of-type {
 }
 
 .summary-card .stats {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     font-weight: bold;
 }
 
@@ -236,6 +238,7 @@ section:last-of-type {
     font-size: .9rem;
     color: var(--link-color);
     transition: var(--transition);
+    cursor: pointer;
 }
 .summary-card .link:hover {
     color: var(--link-hover-color);
@@ -287,7 +290,8 @@ section.with-form {
 }
 
 .page-brief .quick-links .link {
-    color: var(--link-color)
+    color: var(--link-color);
+    cursor: pointer;
 }
 
 aside {
@@ -307,4 +311,37 @@ aside {
 .aside-area .body .link {
     color: var(--link-color);
     transition: var(--transition);
+}
+
+.htmx-indicator{
+    display: inline-block;
+    transition: opacity 500ms ease-in;
+}
+.htmx-indicator.fill {
+    display: block;
+}
+.htmx-request .htmx-indicator{
+    opacity:1
+}
+.htmx-request.htmx-indicator{
+    opacity:1
+}
+
+a.link {
+    cursor: pointer !important;
+}
+
+form ul li,
+form .helptext {
+    color: hsl(184, 55%, 30%);
+}
+
+form .errorlist li {
+    color: hsl(0, 100%, 49%);
+}
+.error-area {
+    background-color: red;
+}
+.success-area {
+    background-color: rgb(24, 187, 59);;
 }
