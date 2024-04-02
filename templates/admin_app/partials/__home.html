@@ -1,0 +1,43 @@
+{% block content %}
+
+<section class="grid summaries">
+    <header>
+        <h3 class="title">Summaries</h3>
+    </header>
+    <div class="area-body grid">
+        <div class="summary-card">
+            <p class="title">Schemes</p>
+            <div class="body">
+                <p class="stats">{{ schemes|length }}</p>
+                <a href="" class="link">View All</a>
+            </div>
+        </div>
+        <div class="summary-card">
+            <p class="title">Total Credit</p>
+            <div class="body">
+                <p class="stats">{{ total_credit }}</p>
+                <a href="" class="link">View All</a>
+            </div>
+        </div>
+        <div class="summary-card">
+            <p class="title">Total Debit</p>
+            <div class="body">
+                <p class="stats">{{ total_debit }}</p>
+                <a href="" class="link">View All</a>
+            </div>
+        </div>
+        <div class="summary-card">
+            <p class="title">Beneficiaries</p>
+            <div class="body">
+                <p class="stats">{{ beneficiaries|length }}</p>
+                <a href="" class="link">View All</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "./__schemes_list.html" %}
+
+{% include "./__transactions_list.html" %}
+
+{% endblock %}

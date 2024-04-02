@@ -1,0 +1,12 @@
+{% block content %}
+<section class="grid with-form" id="create_scheme">
+    <header>
+        <h3 class="title">Create a new scheme</h3>
+    </header>
+    <form hx-post="{% url 'admin_app:create-scheme' %}" hx-target="#swappable">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" class="btn btn-primary" value="Save">
+    </form>
+</section>
+{% endblock %}

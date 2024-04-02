@@ -1,0 +1,58 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<main>
+    <div class="search-area with-extra-cta grid">
+        <div class="form-area grid">
+            <form hx-post="{% url 'admin_app:home' %}" class="grid" hx-target="#swappable" hx-indicator=".loader">
+                {% csrf_token %}
+                <label for="search-area">Enter Scheme Name/Number:</label>
+                <input type="text" name="search-keyword" id="search-area">
+                <input type="submit" value="Search" class="btn btn-primary">
+            </form>
+            <button class="btn btn-primary">Scan Barcode</button>
+            <div class="loader htmx-indicator"></div>
+        </div>
+        <div class="quick-links grid">
+            <a class="link" hx-get="{% url 'admin_app:create-scheme' %}" hx-target="#swappable" hx-indicator=".loader">Create Scheme</a>
+        </div>
+    </div>
+    <div id="swappable" class="grid">
+        <section class="grid summaries">
+            <header>
+                <h3 class="title">Summaries</h3>
+            </header>
+            <div class="area-body grid">
+                <div class="summary-card">
+                    <p class="title">Schemes</p>
+                    <div class="body">
+                        <p class="stats">{{ schemes|length }}</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <p class="title">Total Credit</p>
+                    <div class="body">
+                        <p class="stats">{{ total_credit }}</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <p class="title">Total Debit</p>
+                    <div class="body">
+                        <p class="stats">{{ total_debit }}</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <p class="title">Beneficiaries</p>
+                    <div class="body">
+                        <p class="stats">{{ beneficiaries|length }}</p>
+                        <a href="" class="link">View All</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% include "./partials/__schemes_list.html" %}
+    <div id="swappable" class="grid">
+</main>
+{% endblock %}

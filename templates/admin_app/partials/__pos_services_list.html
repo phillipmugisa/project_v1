@@ -1,0 +1,38 @@
+{% block content %}
+<thead>
+    <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Price</th>
+    </tr>
+</thead>
+<tbody>
+    {% for service in services %}
+    <tr data-code="{{ service.code }}" data-name="{{ service.name }}" data-id="{{ service.id }}" data-price="{{ service.price }}">
+        <td>{{ service.code }}</td>
+        <td>{{ service.name }}</td>
+        <td>{{ service.price }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+
+<script>
+    document.querySelectorAll("#services table tbody tr").forEach(elem => {
+
+        document.querySelectorAll(".selected-services > *").forEach(el => {
+            if (el.dataset["id"] == elem.dataset["id"]) {
+                elem.classList.add("selected-item")
+            }
+        })
+        elem.addEventListener("click", () => {
+            elem.classList.toggle("selected-item")
+
+            let parent = elem.closest(".body-part")
+            if (parent.id === "services") {
+                handleServiceSelect(elem);
+            }
+        })
+    })
+</script>
+{% endblock %}

@@ -7,7 +7,7 @@
 }
 
 body#app-wrapper {
-    width: 90%;
+    width: 95%;
     margin-inline: auto;
     height: 100%;
     overflow-y: auto;
@@ -22,7 +22,7 @@ body#app-wrapper {
 
 body#app-wrapper:has(aside) {
     grid-template-columns: 4fr 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 1fr 9fr;
 }
 
 body#app-wrapper:has(aside) header#app-header {
@@ -90,6 +90,8 @@ main {
     padding: .5rem 1rem;
     font-size: 1rem;
     border-radius: 5px;
+    border-color: transparent;
+    place-items: center;
 }
 .btn-primary {
     background-color: var(--primary-color);
@@ -101,6 +103,8 @@ main {
 .btn-table-actions {
     display: grid;
     justify-content: center;
+    place-content: center;
+    text-align: center;
     padding: .25rem .75rem; 
     border-radius: 100px;
     transition: var(--transition);
@@ -248,6 +252,19 @@ section.with-form {
     background-color: #F8F9FB;
     padding: 1rem;
 }
+section.with-form p {
+    display: grid;
+    gap: .5rem;
+}
+
+section.with-form p input[type="checkbox"] {
+    justify-self: flex-start;
+    inline-size: 50px;
+}
+.bio-data input:not([type="submit"]) {
+    padding: .5rem 1rem !important;
+    font-size: 1.4rem !important;
+}
 
 .with-form form {
     display: grid;
@@ -256,6 +273,23 @@ section.with-form {
 }
 .with-form form input[type="submit"] {
     grid-column: 1/-1;
+}
+
+.with-form form input[type="submit"] {
+    align-self: flex-end;
+}
+
+.with-form form .input-cta {
+    grid-column: 1/-1;
+}
+
+form.payments {
+    grid-template-columns: 1fr;
+}
+form.payments p {
+    grid-auto-flow: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .search-area.content-search {
@@ -339,9 +373,107 @@ form .helptext {
 form .errorlist li {
     color: hsl(0, 100%, 49%);
 }
+
+.message {
+    position: fixed;
+    top: 10%;
+    left: 40%;
+    display: grid;
+    padding: .5rem 1rem;
+    place-content: center;
+    text-align: center;
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    animation: msg-enter .2s forwards;
+}
+
+@keyframes msg-enter {
+    0% {top: -10%;}
+    100% {top: 10%;}
+}
+
 .error-area {
     background-color: red;
 }
 .success-area {
     background-color: rgb(24, 187, 59);;
+}
+
+.pos-view {
+    display: grid;
+    border: 1px solid lightgray;
+    gap: 0;
+}
+
+.pos-view header {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+}
+.pos-view header > div {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: flex-start;
+    gap: 1rem;
+    align-items: baseline;
+}
+.pos-view .selected-items {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+.pos-view .selected-items > * {
+    padding: 0.25rem .5rem;
+    font-size: 1rem;
+    background-color: #00b9f1;
+    border-radius: 5px;
+    color: white;
+    font-weight: 700;
+}
+.pos-view .patient .selected-patients > * {
+    background-color: darkorange;
+}
+.pos-view header .title {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.pos-view .total-price {
+    font-weight: bold;
+    color:rgb(24, 187, 59);
+    font-size: 1.4rem;
+}
+
+.pos-view .body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-block-start: 1px solid lightgray;
+    margin: 0;
+    gap: 0;
+}
+.pos-view .body > div:not(:last-of-type) {
+    display: grid;
+    align-content: flex-start;
+    border-inline-end: 1px solid lightgray;
+}
+.pos-view .body header {
+    padding: 0;
+}
+.pos-view .body header input {
+    width: 100%;
+}
+
+.pos-view tr {
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pos-view tbody tr.selected-item,
+.pos-view tbody tr:hover {
+    background-color: hsla(194, 100%, 80%, 0.494);
+}
+
+.pos-view .body .body-part {
+    padding: .5rem;
 }

@@ -1,0 +1,31 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="prompt-form form-area horizontal">
+    <div class="outer-group">
+        <form hx-post="{% url 'admin_app:home' %}" hx-indicator=".loader" hx-target="#page_list_area" method="post" class="horizontal">
+            {% csrf_token %}
+            <label for="patient_data" style="font-weight: bold;">Insurance Number or Family Name:</label>
+            <input type="text" name="insurance_data" id="insurance_number">
+            <input type="submit" value="Search">
+        </form>
+        <button>Scan Barcode</button>
+    </div>
+    
+    <form hx-post="{% url 'admin_app:home' %}" hx-indicator=".loader" hx-target="#page_list_area" method="post" class="horizontal"  style="background-color: rgb(247, 221, 102);">
+        {% csrf_token %}
+        <label for="patient_data" style="font-weight: bold;">Patient Name/Number:</label>
+        <input type="text" name="patient_data" id="patient_data">
+        <input type="submit" value="Search" name="search_patient">
+    </form>
+
+    <form hx-post="{% url 'admin_app:home' %}" hx-indicator=".loader" hx-target="#page_list_area" class="horizontal" style="background-color: rgb(102, 247, 239);">
+        {% csrf_token %}
+        <label for="create_family" style="font-weight: bold;">Family Name:</label>
+        <input type="text" name="family_name" id="create_family" required>
+        <input type="submit" value="Create New Family" name="create_family_form">
+    </form>
+</div>
+<div id="page_list_area" class="result-area">
+    {% include "./partials/__insurance_list.html" %}
+</div>
+{% endblock %}

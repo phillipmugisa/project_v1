@@ -1,0 +1,15 @@
+{% block content %}
+<section class="grid with-form" id="create_scheme">
+    <header>
+        <h3 class="title">Credit {{ scheme.name }} scheme</h3>
+    </header>
+    <form hx-post="{% url 'admin_app:scheme-credit' scheme.insurance_number %}" hx-target="#swappable">
+        {% csrf_token %}
+        <p>
+            <label for="credit_account">Enter credit amount</label>
+            <input type="number" name="credit_account" id="credit_account" min="0">
+        </p>
+        <input type="submit" class="btn btn-primary" value="Credit" name="credit">
+    </form>
+</section>
+{% endblock %}

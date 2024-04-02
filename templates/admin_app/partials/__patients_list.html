@@ -1,0 +1,73 @@
+{% block content %}
+
+<section class="grid table-area" id="patient-lists">
+    <header>
+        <h3 class="title">Scheme Members</h3>
+    </header>
+    <table id="members_list">
+        <thead>
+            <tr>
+                <th>Patiend No.</th>
+                <th>Name</th>
+                <th>Scheme</th>
+                <th>Access Type</th>
+                <th>Relationship</th>
+                <th>Status</th>
+                <th>Details</th>
+                <th>Action</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.patient.patientno }}</td>
+                <td>{{ patient.patient.firstname }} {{ patient.patient.lastname }}</td>
+                <td>{{ patient.scheme }}</td>
+                <td>{{ patient.access_type }}</td>
+                <td>{{ patient.insurance_type }}</td>
+                <td>
+                    {% if patient.membership_status %}
+                    <p class="text text-success">Active</p>
+                    {% else %}
+                    <p class="text text-danger">Not Active</p>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="" hx-get="{% url 'admin_app:patient-details' patient.patient.patientno %}" hx-target="#app-wrapper" hx-indicator=".loader" class="btn btn-access btn-table-actions">Details</a>
+                </td>
+                <td>
+                    {% if scheme %}
+                    <form hx-post="{% url 'admin_app:scheme-patient' scheme.insurance_number patient.patient.patientno %}" hx-target="#app-wrapper" hx-indicator=".loader">
+                        {% csrf_token %}
+                        {% if patient.scheme %}
+                            {% if patient.membership_status %}
+                            <input type="submit" value="Deactivate"class="btn btn-danger btn-table-actions" name="deactivate">
+                            {% else %}
+                            <input type="submit" value="Activate"class="btn btn-success btn-table-actions" name="activate">
+                            {% endif %}
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if scheme %}
+                    <form hx-post="{% url 'admin_app:scheme-patient' scheme.insurance_number patient.patient.patientno %}" hx-target="#app-wrapper" hx-indicator=".loader">
+                        {% csrf_token %}
+                        {% if patient.scheme %}
+                        <input type="submit" value="Remove"class="btn btn-danger btn-table-actions" name="remove_patient">
+                        {% else %}
+                        <input type="submit" value="Add To Scheme"class="btn btn-success btn-table-actions" name="assign_patient">
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+<script>
+    $(`#members_list`).DataTable()
+</script>
+{% endblock %}

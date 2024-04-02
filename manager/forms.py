@@ -23,4 +23,10 @@ class FamilyMemberForm(ModelForm):
 class SchemeForm(ModelForm):
     class Meta:
         model = ManagerModels.Scheme
-        fields = ["name", "credit", "status"]
+        fields = ["name", "credit", "status", "scheme_type"]
+
+        
+class ServiceForm(ModelForm):
+    class Meta:
+        model = ManagerModels.Service
+        fields = "__all__"        

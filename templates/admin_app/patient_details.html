@@ -1,44 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../../static/css/utils.css">
-    <link rel="stylesheet" href="../../static/css/styles.css">
-    
-    <script src="../../static/js/jquery-3.5.1.js"></script>
-    <script src="../../static/js/jquery.dataTables.min.js"></script>
-</head>
-<body id="app-wrapper" class="grid">
-    <header id="app-header">
-        <nav class="grid">
-            <div class="tabs left-tabs grid">
-                <a href="" class="logo">
-                    <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
-                </a>
-                <a class="btn tab" href="">Home</a>
-                <a class="btn tab" href="">Schemes</a>
-                <a class="btn tab" href="">Patients</a>
-                <a class="btn tab" href="">Services</a>
-            </div>
-            <div class="tabs right-tabs grid">
-                <a class="tab btn btn-primary" href="">Logout</a>
-            </div>
-        </nav>
-    </header>
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
     <main>
         <div class="page-brief">
-            <p>Mukisa Mark Paul</p>
+            <p>{{ patient.firstname }} {{ patient.lastname }}</p>
 
             <div class="quick-links grid">
-                <a class="link" href="">Scheme Details</a>
-                <a class="link" href="">Bio Data</a>
-                <a class="link" href="">Membership Details</a>
-                <a class="link" href="">Payments</a>
-                <!-- <a class="link" href=""></a> -->
+                {% if scheme %}
+                <a class="link" href="{% url 'admin_app:scheme-details' scheme.insurance_number %}">Scheme Details</a>
+                {% endif %}
+                <a class="link" href="" hx-get="{% url 'admin_app:patient-details' patient.patientno %}" hx-target="#app-wrapper" hx-indicator=".loader" >Bio Data</a>
+                <a class="link" href="" hx-get="{% url 'admin_app:patient-membership' patient.patientno %}" hx-target="#swappable" hx-indicator=".loader">Membership Details</a>
+                
+                <!-- {% if scheme %}
+                <a class="link" href=""  hx-get="{% url 'admin_app:patient-payment' patient.patientno %}" hx-target="#swappable" hx-indicator=".loader">Payments</a>
+                {% endif %} -->
             </div>
         </div>
+        <div id="swappable" class="grid">
+            {% include "./partials/__patient_biodata.html" %}
+        </div>
     </main>
-</body>
-</html>
+{% endblock %}

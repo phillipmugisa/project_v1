@@ -1,0 +1,31 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<main>
+    <div class="search-area with-extra-cta grid">
+        <div class="form-area grid">
+            <form hx-post="{% url 'admin_app:home' %}" class="grid" hx-target="#swappable" hx-indicator=".loader">
+                {% csrf_token %}
+                <label for="search-area">Enter Scheme Name/Number:</label>
+                <input type="text" name="search-keyword" id="search-area">
+                <input type="submit" value="Search" class="btn btn-primary">
+            </form>
+            <button class="btn btn-primary">Scan Barcode</button>
+            <div class="loader htmx-indicator"></div>
+        </div>
+        <div class="quick-links grid">
+            <a class="link" hx-get="{% url 'admin_app:create-scheme' %}" hx-target="#swappable" hx-indicator=".loader">Create Scheme</a>
+            <a class="link" href="">Add Patient</a>
+            <a class="link" href="">View Logs</a>
+            <a class="link" href="">View Transactions</a>
+        </div>
+    </div>
+    <div id="swappable" class="grid">
+        {% include "./partials/__home.html" %}
+    </div>
+</main>
+
+<script>
+    $(`#transaction_table`).DataTable()
+    $(`#scheme_table`).DataTable()
+</script>
+{% endblock %}

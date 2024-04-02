@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/utils.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/table.min.css' %}">
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.5.1.js' %}"></script>
+    <script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+    
+    {% if not request.user.is_authenticated %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% endif %}
+</head>
+
+{% if request.user.is_authenticated %}
+<header id="app-header">
+    <nav class="grid">
+        <div class="tabs left-tabs grid">
+            <a href="{% url 'admin_app:home' %}" class="logo">
+                <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
+            </a>
+            <a class="btn tab" href="{% url 'admin_app:home' %}">Home</a>
+            <a class="btn tab" href="{% url 'admin_app:schemes' %}">Schemes</a>
+            <a class="btn tab" href="{% url 'admin_app:pos' %}">POS</a>
+            <a class="btn tab" href="{% url 'admin_app:services' %}">Services</a>
+        </div>
+        <div class="tabs right-tabs grid">
+            <a class="tab btn btn-primary" href="{% url 'auth_app:logout' %}">Logout</a>
+        </div>
+    </nav>
+</header>
+{% endif %}
+{% if messages %}
+    {% for message in messages %}
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+            <div class="message error-area">
+                <p>{{ message }}</p>
+            </div>
+        {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+            <div class="message success-area">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+<body id="app-wrapper" class="grid">
+
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>

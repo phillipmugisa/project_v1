@@ -1,0 +1,54 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="split patient-details">
+    <aside>
+        <div class="side-list side-cta">
+            {% if insurance %}
+            <a href="{% url 'admin_app:insurance-details' insurance.insurance_number %}" class="btn primary">Insurance Group</a>
+            {% endif %}
+            <button class="btn primary" hx-get="{% url 'admin_app:patient-details' patient.patientno %}" hx-indicator=".loader" hx-target="#app-wrapper">View Patient Details</button>
+            <button class="btn primary" hx-get="{% url 'admin_app:patient-insurance-details' patient.patientno %}" hx-indicator=".loader" hx-target="#patient-home">Insurance Details</button>
+
+            {% if family_member %}
+            <button class="btn primary" hx-get="{% url 'admin_app:patient-make-payments' patient.patientno %}" hx-indicator=".loader" hx-target="#patient-home">Use Credit</button>
+            {% endif %}
+
+            {% if family_member and family_member.relationship.name == "principle" %}
+            <div style="display: grid;gap: .25rem;">
+                {% if family_member.moa_document %}
+                <button class="btn primary" hx-get="{% url 'admin_app:principle-documents' patient.patientno %}" hx-indicator=".loader" hx-target="#patient-home">Download MOA</button>
+                {% endif %}
+
+                <form hx-post="{% url 'admin_app:principle-documents' patient.patientno %}" hx-indicator=".loader" hx-target="#patient-home" hx-encoding='multipart/form-data'>
+                    {% csrf_token %}
+                    <label for="moa_doc" class="btn success">Upload MOA</label>
+                    <input type="file" name="moa_doc" id="moa_doc" style="display: none;">
+                    <input type="submit" value="submit" style="display: none;" id="submit_moa">
+                </form>
+            </div>
+            {% endif %}
+            
+            <div class="loader htmx-indicator fill"></div>
+        </div>
+    </aside>
+    <div class="view-body" id="patient-home">
+        <div class="view-part" style="grid-column: 1/-1;">
+            <div class="form-area" style="grid-column: 1/-1;">
+                <h3 class="title">{{ patient.firstname }} {{ patient.lastname }} Detials</h3>
+                <form action="{% url 'admin_app:patient-details' patient.patientno %}" method="post" class="split">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector("#moa_doc").addEventListener("change", (e) => {
+        console.log(e.target.closest("form").querySelector("#submit_moa"))
+        e.target.closest("form").querySelector("#submit_moa").click()
+    })
+</script>
+{% endblock %}

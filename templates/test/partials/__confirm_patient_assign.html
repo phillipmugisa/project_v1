@@ -1,0 +1,12 @@
+{% block content %}
+<div class="modal confirm-patient-assign">
+    <header>
+        <h3>Adding {{ patient.firstname }} {{ patient.lastname }} to {{ instance.family.name }}</h3>
+    </header>
+    <form hx-post="{% url 'admin_app:insurance-assign-patient' insurance.insurance_number p.patient.patientno %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Assign to Family" name="assign_membership">
+    </form>
+</div>
+{% endblock %}

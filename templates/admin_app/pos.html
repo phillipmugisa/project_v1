@@ -1,0 +1,187 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+    <main class="grid">
+        <section class="pos-view grid">
+            <header>
+                <div class="selections">
+                    <span class="title">Selected Services: </span>
+                    <div class="selected-items selected-services"></div>
+                </div>
+                <div class="patient">
+                    <span class="title">Selected Patient: </span>
+                    <div class="selected-items selected-patients"></div>
+                </div>
+                <div class="price">
+                    <span class="title">Total Price: </span>
+                    <span class="total-price" id="total_amount">0</span>
+                </div>
+                <div class="actions_area">
+                    <button class="btn btn-primary" id="place_trans">Place Transaction</button>
+                </div>
+            </header>
+            <div class="body grid">
+                <div class="body-part" id="services">
+                    <header>
+                        <h3 class="title">Select Services</h3>
+                        <form hx-post="{% url 'admin_app:pos-services' %}" hx-target="#services-list">
+                            {% csrf_token %}
+                            <input type="search" name="service_keyword" id="" placeholder="Search">
+                        </form>
+                    </header>
+                    <table id="services-list">
+                        {% include "./partials/__pos_services_list.html" %}
+                    </table>
+                </div>
+                <div class="body-part" id="schemes">
+                    <header>
+                        <h3 class="title">Select Scheme</h3>
+                        <form hx-post="{% url 'admin_app:pos-schemes' %}" hx-target="#schemes-list">
+                            {% csrf_token %}
+                            <input type="search" name="scheme_keyword" id="" placeholder="Search">
+                        </form>
+                    </header>
+                    <table id="schemes-list">
+                        {% include "./partials/__pos_schemes_list.html" %}
+                    </table>
+                </div>
+                <div class="body-part" id="patients">
+                    <header>
+                        <h3 class="title">Select Patient</h3>
+                    </header>
+                    <table id="patients-list">
+                        {% include "./partials/__pos_patients_list.html" %}
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+<script>
+
+    document.querySelector("#place_trans").addEventListener("click", elem => {
+        let data = {
+            "patient": "",
+            "services": [],
+            "total_amount": 0
+        }
+
+        let services_list = [];
+        document.querySelectorAll(".selected-services > *").forEach(elem => {
+            services_list.push({
+                "id": elem.dataset["id"],
+                "name": elem.dataset["name"],
+                "code": elem.dataset["code"],
+            })
+            data["total_amount"] = data["total_amount"] + parseFloat(elem.dataset["price"])
+        })
+        data["services"] = services_list
+        if (services_list.length < 1) {
+            alert("No service selected")
+            return
+        }
+
+        let patient_list = [];
+        document.querySelectorAll(".selected-patients > *").forEach(elem => {
+            patient_list.push({
+                "patientno": elem.dataset["patientno"],
+                "scheme": elem.dataset["scheme"],
+            })
+        })
+        if (patient_list.length < 1) {
+            alert("No patient selected")
+            return
+        }
+        data["patient"] = patient_list[0]
+
+        const payload = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': "{{ csrf_token }}"  // Ensure you have a function to retrieve CSRF token
+            },
+            body: JSON.stringify(data)
+        };
+
+        // Send the data to Django view
+        fetch('{% url "admin_app:pos" %}', payload)
+            .then(response => {
+                if (!response.ok) {
+                    response.json()
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(data.error)
+                }
+                else {
+                    alert("Operation successful")
+                    window.location.reload()
+                }
+                return
+            })
+            .catch(error => {
+                // Handle network errors or other issues
+                alert("Unable to reach server")
+                return
+            });
+
+    })
+
+    const handleServiceSelect = (row) => {
+        displaySelectedService(row);
+        let total_amount = 0;
+        document.querySelectorAll(".selected-services > *").forEach(elem => {
+            let price = parseFloat(elem.dataset["price"])
+            total_amount = total_amount + price
+        })
+        document.querySelector("#total_amount").textContent = total_amount
+    }
+
+    const displaySelectedService = (elem) => {
+        let parent = document.querySelector(".selected-services")
+        
+        if (elem.classList.contains("selected-item")) {
+            // add item
+            let el = document.createElement("span")
+            el.textContent = elem.dataset["name"]
+            el.dataset["price"] = elem.dataset["price"]
+            el.dataset["name"] = elem.dataset["name"]
+            el.dataset["code"] = elem.dataset["code"]
+            el.dataset["id"] = elem.dataset["id"]
+            parent.appendChild(el)
+            return
+        }
+        parent.childNodes.forEach(el => {
+            if (el.textContent == elem.dataset["name"]) {
+                el.remove()
+            }
+        })
+
+    }
+    
+    const handlePatientSelect = (row) => {
+        displaySelectedParent(row);
+    }
+
+    const displaySelectedParent = (elem) => {
+        let parent = document.querySelector(".selected-patients")
+        parent.childNodes.forEach(el => {
+            if (el.dataset["patientno"] != elem.dataset["patientno"]) {
+                el.remove()
+            }
+        })
+        if (elem.classList.contains("selected-item")) {
+            // add item
+            let el = document.createElement("span")
+            el.textContent = elem.dataset["name"]
+            el.dataset["patientno"] = elem.dataset["patientno"]
+            el.dataset["scheme"] = elem.dataset["scheme"]
+            parent.appendChild(el)
+            return
+        }
+
+    }
+</script>
+{% endblock %}

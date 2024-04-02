@@ -1,0 +1,60 @@
+{% extends "utils/layout.html" %}
+{% block content %}
+<div class="split instance-details main-area">
+    <aside>
+        <div class="side-list insurance-brief">
+            <span style="font-size: 1.2rem;font-weight: bold;">{{ insurance.family.name }} Family</span>
+            <span>Insurance No.: {{ insurance.insurance_number }}</span>
+            <span class="flex">
+                <span>Status: </span>
+                {% if insurance.status %}
+                    <span class="status active">Active</span>
+                {% else %}
+                    <span class="status suspended">Suspended</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="side-list side-cta">
+            <a class="btn primary" hx-get="{% url 'admin_app:insurance-details' insurance.insurance_number %}" hx-indicator=".loader" hx-target="#app-wrapper">View Beneficians</a>
+            <a class="btn primary" hx-get="{% url 'admin_app:insurance-credit-account' insurance.insurance_number %}" hx-indicator=".loader" hx-target="#insurance-home">Credit Account</a>
+            <form hx-indicator=".loader" hx-target="#app-wrapper" hx-post="{% url 'admin_app:insurance-details' insurance.insurance_number %}" method="post">
+                {% csrf_token %}
+
+                {% if insurance.status == True %}
+                    <input type="submit" value="Suspend Account" class="btn danger" name="toggle_status">
+                {% else %}
+                    <input type="submit" value="Activate Account" class="btn success" name="toggle_status">
+                {% endif %}
+                
+            </form>
+        </div>
+    </aside>
+    <div class="view-body">
+        <div class="view-part span-all">
+            <div class="sub-view-part">
+                <span class="title">Credit</span>
+                <span class="value">{{ insurance.credit }}</span>
+            </div>
+            <div class="sub-view-part">
+                <span class="title">Beneficians</span>
+                <span class="value">{{ benefician_count }}</span>
+            </div>
+        </div>
+        <div class="view-part" id="insurance-home" style="grid-column: 1/-1;">
+            <h3>Add Beneficians to {{ insurance.family.name }} insurance</h3>
+            <div class="prompt-form form-area horizontal">
+                <form hx-post="{% url 'admin_app:insurance-details' insurance.insurance_number %}" hx-indicator=".loader" hx-target="#page_list_area" method="post" class="horizontal">
+                    {% csrf_token %}
+                    <label for="patient_data" style="font-weight: bold;">Patient Name/Number:</label>
+                    <input type="text" name="patient_data" id="patient_data">
+                    <input type="submit" value="Search" name="search_patient">
+                    <div class="loader htmx-indicator"></div>
+                </form>
+            </div>
+            <div id="page_list_area" class="result-area">
+                {% include "./partials/__patient_list.html" %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

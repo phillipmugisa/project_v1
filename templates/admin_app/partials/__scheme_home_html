@@ -1,0 +1,46 @@
+{% block content %}
+    <section class="grid summaries">
+        <header>
+            <h3 class="title">Summaries</h3>
+        </header>
+        <div class="area-body grid">
+            <div class="summary-card">
+                <p class="title">Total Credit</p>
+                <div class="body">
+                    {% if scheme.credit < 0 %}
+                    <p class="stats text-danger">{{ scheme.credit }}</p>
+                    {% else %}
+                    <p class="stats">{{ scheme.credit }}</p>
+                    {% endif %}
+                    <!-- <a href="" class="link">View All</a> -->
+                </div>
+            </div>
+            <div class="summary-card">
+                <p class="title">Total Debit</p>
+                <div class="body">
+                    <p class="stats">{{ total_debit }}</p>
+                    <!-- <a href="" class="link">View All</a> -->
+                </div>
+            </div>
+            <div class="summary-card">
+                <p class="title">Beneficiaries</p>
+                <div class="body">
+                    <p class="stats">{{ members|length }}</p>
+                    <!-- <a href="" class="link">View All</a> -->
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="search-area content-search grid">
+        <div class="form-area grid">
+            <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" class="grid" hx-target="#patient-lists" hx-swap="outerHTML" hx-indicator=".loader">
+                {% csrf_token %}
+                <label for="search-area">Enter Patient Name/Number:</label>
+                <input type="text" name="search-keyword" id="search-area">
+                <input type="submit" value="Search" class="btn btn-primary">
+            </form>
+            <div class="loader htmx-indicator"></div>
+        </div>
+    </div>
+    {% include './__patients_list.html' %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% block content %}
+<section class="grid table-area" id="schemes">
+    <header>
+        <h3 class="title">Schemes</h3>
+    </header>
+    <table id="scheme_table">
+        <thead>
+            <tr>
+                <th>Count</th>
+                <th>Scheme No.</th>
+                <th>Name</th>
+                <th>Credit</th>
+                <th>Status</th>
+                <th>Creation Date</th>
+                <th>Details</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for scheme in schemes %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ scheme.insurance_number }}</td>
+                <td>{{ scheme.name }}</td>
+                <td>
+                    {% if scheme.credit > 0 %}
+                    <span class="text text-success">{{ scheme.credit }}</span>
+                    {% else %}
+                    <span class="text text-danger">{{ scheme.credit }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if scheme.status %}
+                    <span class="text text-success">Active</span>
+                    {% else %}
+                    <span class="text text-danger">Not Active</span> 
+                    {% endif %}
+                </td>
+                <td>{{ scheme.created_on }}</td>
+                <td>
+                    <a href="{% url 'admin_app:scheme-details' scheme.insurance_number %}" class="btn btn-access btn-table-actions">Details</a>
+                </td>
+                <td>
+                    <a href="" class="btn btn-danger btn-table-actions">Deactivate</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

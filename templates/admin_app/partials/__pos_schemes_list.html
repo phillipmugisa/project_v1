@@ -1,0 +1,33 @@
+{% block content %}
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Credit</th>
+    </tr>
+</thead>
+<tbody>
+    {% for scheme in schemes %}
+    <tr data-name="{{ scheme.name }}" data-id="{{ scheme.id }}" hx-get="{% url 'admin_app:pos-scheme-patients' scheme.insurance_number %}" hx-target="#patients-list">
+        <td>{{ scheme.name }}</td>
+        <td>{{ scheme.credit }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+<script>
+    document.querySelectorAll("#schemes table tbody tr").forEach(elem => {
+        elem.addEventListener("click", () => {
+            elem.classList.toggle("selected-item")
+
+            let parent = elem.closest(".body-part")
+            if (parent.id === "schemes") {
+                parent.querySelectorAll(".selected-item").forEach(el => {
+                    if (el != elem && el.classList.contains("selected-item")) {
+                        el.classList.remove("selected-item")
+                    }
+                })
+            }
+        })
+    })
+</script>
+{% endblock %}

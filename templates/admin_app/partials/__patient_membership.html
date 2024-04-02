@@ -1,0 +1,13 @@
+{% block content %}
+<section class="grid with-form bio-data">
+<header>
+    <h3>Modify {{ patient.firstname }} {{ patient.lastname }} Bio Data details</h3>
+</header>
+<form hx-post="{% url 'admin_app:patient-membership' patient.patientno %}" hx-indicator=".loader" hx-target="#swappable" method="post" class="short emphasized" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save" class="btn btn-primary" name="modify_patient_insurance">
+    <!-- <input type="submit" value="Save Without Verification" name="admin_bypass"> -->
+</form>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% block content %}
+
+<section class="grid table-area" id="recent-transactions">
+    <header>
+        <h3 class="title">Recent Transactions</h3>
+    </header>
+    <table id="transaction_table">
+        <thead>
+            <tr>
+                <th>Count</th>
+                <th>Scheme</th>
+                <th>Patient</th>
+                <th>Reason/Service</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Reports</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ transaction.scheme }}</td>
+                <td>{{ transaction.member.patient }}</td>
+                
+                {% if transaction.service %}
+                <td>{{ transaction.service.name }}</td>
+                {% else %}
+                <td>{{ transaction.reason }}</td>
+                {% endif %}
+
+                <td>{{ transaction.amount_used }}</td>
+                <td>
+                    {% if transaction.completed %}
+                    <span class="text text-success">Completed</span>
+                    {% else %}
+                    <span class="text text-danger">Incompleted</span> 
+                    {% endif %}
+                </td>
+                <td>{{ transaction.created_on }}</td>
+                <td>
+                    <a href="" class="btn btn-access btn-table-actions">Report</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

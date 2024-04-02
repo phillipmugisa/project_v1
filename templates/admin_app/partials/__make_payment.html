@@ -1,0 +1,21 @@
+{% block content %}
+<main class="grid">
+    <section class="with-form grid">
+        <header>
+            <h3>Select desired services</h3>
+        </header>
+        <form action="{% url 'admin_app:services' %}" method="post" class="grid payments">
+            {% csrf_token %}
+
+            {% for service in services %}
+            <p>
+                <label for="service_{{forloop.counter}}">{{ service.name }}</label>
+                <input type="checkbox" name="service_{{forloop.counter}}" id="">
+                <input type="number" name="amount" id="service_{{forloop.counter}}" value="{{ service.price }}">
+            </p>
+            {% endfor %}
+            <input type="submit" class="btn btn-primary" value="Save">
+        </form>
+    </section>
+</main>
+{% endblock %}

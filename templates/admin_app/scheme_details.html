@@ -1,0 +1,58 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+    <main class="grid">
+        <div class="page-brief">
+            <p>{{ scheme.name }} Scheme</p>
+
+            <div class="actions">
+                <a href="" hx-get="{% url 'admin_app:scheme-credit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader" class="btn btn-success">Credit account</a>
+                <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" hx-target="#app-wrapper" hx-indicator=".loader">
+                    {% csrf_token %}
+                    {% if scheme.status %}
+                        <input type="submit" value="Suspend Account" name="suspend_acount" class="btn btn-danger">
+                    {% else %}
+                        <input type="submit" value="Activate Account" name="activate_acount" class="btn btn-success">
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        <div id="swappable" class="grid">
+            {% include "./partials/__scheme_home_html" %}
+        </div>
+    </main>
+
+    <aside class="grid">
+        <div class="aside-area">
+            <h4 class="title">Recent Transactions</h4>
+            <table id="scheme-transactions">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.reference_no }}</td>
+                        <td>{{ transaction.amount_used }}</td>
+                        <td>{{ transaction.created_on }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="aside-area">
+            <h4 class="title">Reports</h4>
+            <div class="body">
+                <a href="" class="report-triggers link">Patients reports</a>
+                <a href="" class="report-triggers link">Transactions reports</a>
+            </div>
+        </div>
+    </aside>
+    
+    <script>
+        $(`#scheme_table`).DataTable()
+    </script>
+{% endblock %}

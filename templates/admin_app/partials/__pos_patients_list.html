@@ -1,0 +1,35 @@
+{% block content %}
+<thead>
+    <tr>
+        <th>Patient No.</th>
+        <th>Name</th>
+    </tr>
+</thead>
+<tbody>
+    {% for patient in patients %}
+    <tr data-scheme="{{ patient.scheme.id }}" data-patientno="{{ patient.patient.patientno }}" data-name="{{ patient.patient.firstname }} {{ patient.patient.lastname }}">
+        <td>{{ patient.patient.patientno }}</td>
+        <td>{{ patient.patient.firstname }} {{ patient.patient.lastname }}</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+
+<script>
+    document.querySelectorAll("#patients table tbody tr").forEach(elem => {
+        elem.addEventListener("click", () => {
+            elem.classList.toggle("selected-item")
+
+            let parent = elem.closest(".body-part")
+            if (parent.id === "patients") {
+                parent.querySelectorAll(".selected-item").forEach(el => {
+                    if (el != elem && el.classList.contains("selected-item")) {
+                        el.classList.remove("selected-item")
+                    }
+                })
+                handlePatientSelect(elem);
+            }
+        })
+    })
+</script>
+{% endblock %}

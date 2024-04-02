@@ -1,0 +1,59 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+    <main class="grid">
+        <section class="with-form grid">
+            <header>
+                <h3>Create new service</h3>
+            </header>
+            <form action="{% url 'admin_app:services' %}" method="post" class="grid short-cta">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" class="btn btn-primary" value="Save">
+            </form>
+
+            <hr>
+            
+            <form action="{% url 'admin_app:services' %}" method="post" class="grid short-cta" enctype="multipart/form-data">
+                {% csrf_token %}
+                <label for="excel_file" class="btn btn-access input-cta">Upload using an excel file</label>
+                <input type="file" name="excel_file" id="excel_file" style="display: none;" accept=".xls,.xlsx" >
+                <input type="submit" class="btn btn-primary" value="Upload file" style="display: none;">
+            </form>
+        </section>
+        <hr>
+        <section class="grid table-area">
+            <header>
+                <h3 class="title">Services</h3>
+            </header>
+            <table id="services-list">
+                <thead>
+                    <tr>
+                        <th>Count</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ service.code }}</td>
+                        <td>{{ service.name }}</td>
+                        <td>{{ service.price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+    
+<script>
+    $(`#services-list`).DataTable()
+
+    const excel_file_cta = document.querySelector("#excel_file")
+    excel_file_cta.addEventListener("change", () => {
+        excel_file_cta.closest("form").submit()
+    })
+</script>
+{% endblock %}

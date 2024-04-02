@@ -103,7 +103,7 @@ class FamilyMember(models.Model):
     access_type = models.ForeignKey(to="AccessType", on_delete=models.SET_NULL, null=True)
     scheme_no = models.CharField(_("Scheme Number"), max_length=256, null=True, blank=True)
 
-    moa_document = models.FileField(
+    mou_document = models.FileField(
         verbose_name=_("MOA Document"),
         upload_to=get_file_path,
         null=True, blank=True
@@ -147,6 +147,7 @@ class RelationshipType(models.Model):
         return self.name
 
 class Service(models.Model):
+    code = models.CharField(verbose_name="Code", max_length=256)
     name = models.CharField(verbose_name="Name", max_length=256)
     price = models.DecimalField(verbose_name="Price of service", decimal_places=2, max_digits=12, blank=True, null=True)
 
@@ -155,6 +156,7 @@ class Service(models.Model):
 
 class Transaction(models.Model):
     reference_no = models.CharField(verbose_name="reference number", max_length=256)
+    reason = models.CharField(verbose_name="reason", max_length=256, null=True, blank=True)
     service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
     member = models.ForeignKey(to=FamilyMember, on_delete=models.SET_NULL, null=True)
     scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True)
@@ -175,6 +177,7 @@ class Scheme(models.Model):
     insurance_number = models.CharField(db_column='Insurance Number', max_length=100, blank=True, null=True)
     credit = models.DecimalField(verbose_name="Credit On Account", decimal_places=2, max_digits=12, blank=True, null=True)
     status = models.BooleanField(default=True)
+    scheme_type = models.ForeignKey(to="SchemeType", on_delete=models.SET_NULL, null=True, blank=True)
     created_on = models.DateField(_("Created on"), default=timezone.now)
     updated_on = models.DateField(_("Created on"), null=True, blank=True)
 
@@ -190,7 +193,23 @@ class Scheme(models.Model):
     def __str__(self):
         return f"{self.name} {self.insurance_number}"
 
+class SchemeType(models.Model):
+    name = models.CharField(_("Name"), max_length=256)
+    canExceedCredit = models.BooleanField(_("Can Exceed Credit"), default=False)
 
-class log(models.Model):
+    def __str__(self):
+        return self.name
+
+class SchemeRemote(models.Model):
+    scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True, blank=True)
+    file_path = models.CharField(_("file path"), max_length=256)
+    created_on = models.DateField(_("Created on"), default=timezone.now)
+
+    def __str__(self):
+        return self.name
+
+
+class Log(models.Model):
     action = models.CharField(verbose_name="actions", max_length=256)
-    updated_on = models.DateField(_("Created on"), null=True, blank=True)
+    reason = models.CharField(verbose_name="reason", max_length=256, null=True, blank=True)
+    created_on = models.DateField(_("Created on"), default=timezone.now)
