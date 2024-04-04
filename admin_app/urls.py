@@ -23,4 +23,6 @@ urlpatterns = [
 
     path("pos/services/", AdminAppViews.POSServicesView.as_view(), name="pos-services"),
     path("pos/schemes/", AdminAppViews.POSSchemesView.as_view(), name="pos-schemes"),
+
+    path("transactions/", AdminAppViews.TransactionsView.as_view(), name="transactions"),
 ]

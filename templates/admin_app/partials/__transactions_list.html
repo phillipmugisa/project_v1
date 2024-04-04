@@ -8,9 +8,9 @@
         <thead>
             <tr>
                 <th>Count</th>
+                <th>Reference No</th>
                 <th>Scheme</th>
                 <th>Patient</th>
-                <th>Reason/Service</th>
                 <th>Amount</th>
                 <th>Status</th>
                 <th>Date</th>
@@ -21,14 +21,9 @@
             {% for transaction in transactions %}
             <tr>
                 <td>{{ forloop.counter }}</td>
+                <td>{{ transaction.reference_no }}</td>
                 <td>{{ transaction.scheme }}</td>
                 <td>{{ transaction.member.patient }}</td>
-                
-                {% if transaction.service %}
-                <td>{{ transaction.service.name }}</td>
-                {% else %}
-                <td>{{ transaction.reason }}</td>
-                {% endif %}
 
                 <td>{{ transaction.amount_used }}</td>
                 <td>
@@ -40,7 +35,7 @@
                 </td>
                 <td>{{ transaction.created_on }}</td>
                 <td>
-                    <a href="" class="btn btn-access btn-table-actions">Report</a>
+                    <a target="_blank" href="{% url 'admin_app:transactions' %}?ref={{transaction.reference_no}}" class="btn btn-access btn-table-actions">Report</a>
                 </td>
             </tr>
             {% endfor %}

@@ -20,18 +20,6 @@
                 </div>
             </header>
             <div class="body grid">
-                <div class="body-part" id="services">
-                    <header>
-                        <h3 class="title">Select Services</h3>
-                        <form hx-post="{% url 'admin_app:pos-services' %}" hx-target="#services-list">
-                            {% csrf_token %}
-                            <input type="search" name="service_keyword" id="" placeholder="Search">
-                        </form>
-                    </header>
-                    <table id="services-list">
-                        {% include "./partials/__pos_services_list.html" %}
-                    </table>
-                </div>
                 <div class="body-part" id="schemes">
                     <header>
                         <h3 class="title">Select Scheme</h3>
@@ -50,6 +38,18 @@
                     </header>
                     <table id="patients-list">
                         {% include "./partials/__pos_patients_list.html" %}
+                    </table>
+                </div>
+                <div class="body-part" id="services">
+                    <header>
+                        <h3 class="title">Select Services</h3>
+                        <form hx-post="{% url 'admin_app:pos-services' %}" hx-target="#services-list">
+                            {% csrf_token %}
+                            <input type="search" name="service_keyword" id="" placeholder="Search">
+                        </form>
+                    </header>
+                    <table id="services-list">
+                        {% include "./partials/__pos_services_list.html" %}
                     </table>
                 </div>
             </div>
@@ -117,15 +117,28 @@
                 }
                 else {
                     alert("Operation successful")
+
+                    console.log(data)
+                    console.log(data.transaction_ref)
+                    console.log(`{% url 'admin_app:transactions' %}?ref=${data.transaction_ref}`)
+                    
+                    // redirect
+                    let link = document.createElement("a")
+                    link.href = `{% url 'admin_app:transactions' %}?ref=${data.transaction_ref}`
+                    link.style.display = "none"
+                    link.target = "_blank"
+                    document.body.appendChild(link)
+                    link.click()
+
                     window.location.reload()
                 }
                 return
             })
-            .catch(error => {
-                // Handle network errors or other issues
-                alert("Unable to reach server")
-                return
-            });
+            // .catch(error => {
+            //     // Handle network errors or other issues
+            //     alert("Unable to reach server")
+            //     return
+            // });
 
     })
 

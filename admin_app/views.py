@@ -605,30 +605,39 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             response_data = {'error': f'Total ammount({json_data.get("total_amount")}) exceed scheme credit({scheme.credit})'}
             return JsonResponse(response_data)
 
+        # create transaction
+        transaction = ManagerModels.Transaction.objects.create(
+            member = member,
+            scheme=scheme,
+            amount_used = json_data.get("total_amount"),
+            reason=f"Payment for Member: {member.patient}",
+            completed=True,
+            authorised=True
+        )
+        
+        try:
+            for service in json_data.get("services"):
+                
+                service = ManagerModels.Service.objects.filter(id=service.get("id"), code=service.get("code"))
+                if not service:
+                    response_data = {'error': 'Invalid data provided'}
+                    return JsonResponse(response_data)
+                service = service.first()
 
-        for service in json_data.get("services"):
-            
-            service = ManagerModels.Service.objects.filter(id=service.get("id"), code=service.get("code"))
-            if not service:
-                response_data = {'error': 'Invalid data provided'}
-                return JsonResponse(response_data)
-            service = service.first()
+                ManagerModels.TransactionService.objects.create(
+                    service = service,
+                    transaction = transaction
+                )
 
-            transction = ManagerModels.Transaction(
-                service = service,
-                member = member,
-                scheme=scheme,
-                amount_used = service.price,
-                completed=True,
-                authorised=True
-            )
-            transction.save()
+                # reduce scheme credit
+                scheme.credit = scheme.credit - service.price
+                scheme.save()
+        except:
+            transaction.delete()
+            response_data = {'error': 'Error processing data'}
+            return JsonResponse(response_data)
 
-            # reduce scheme credit
-            scheme.credit = scheme.credit - service.price
-            scheme.save()
-
-        response_data = {'message': 'Data received successfully'}
+        response_data = {'message': 'Data received successfully', "transaction_ref": transaction.reference_no}
         return JsonResponse(response_data, status=200)
 
 class POSSchemePatientsView(AdminAndAuthenticatedAccessMixin, View):
@@ -673,6 +682,28 @@ class POSSchemesView(AdminAndAuthenticatedAccessMixin, View):
             self.context_data["schemes"] = ManagerModels.Scheme.objects.all()[:10]
 
         return render(request, template_name=self.__partial_template, context=self.context_data)
+
+class TransactionsView(AdminAndAuthenticatedAccessMixin, View):
+    template_name= "admin_app/transactions.html"
+    receipt_template_name = "admin_app/transaction_receipt.html"
+    context_data = {}
+    def get(self, request):
+        ref_no = request.GET.get('ref')
+
+        if ref_no:
+            transaction = ManagerModels.Transaction.objects.filter(reference_no=ref_no)
+            self.context_data["transaction"] = transaction.first()
+            if transaction:
+                services = ManagerModels.TransactionService.objects.filter(transaction=transaction.first())
+                self.context_data["services"] = services
+            
+            return render(request, template_name=self.receipt_template_name, context=self.context_data)
+        else:
+            transactions = ManagerModels.Transaction.objects.all()
+            self.context_data["transactions"] = transactions
+
+        return render(request, template_name=self.template_name, context=self.context_data)
+
 
 # utils
 def generate_insurance_no(family_name):

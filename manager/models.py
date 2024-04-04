@@ -157,7 +157,6 @@ class Service(models.Model):
 class Transaction(models.Model):
     reference_no = models.CharField(verbose_name="reference number", max_length=256)
     reason = models.CharField(verbose_name="reason", max_length=256, null=True, blank=True)
-    service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
     member = models.ForeignKey(to=FamilyMember, on_delete=models.SET_NULL, null=True)
     scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True)
     amount_used = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)
@@ -165,12 +164,16 @@ class Transaction(models.Model):
     authorised = models.BooleanField(default=False)
     created_on = models.DateField(_("Created on"), default=timezone.now)
 
-    
     def save(self, *args, **kwargs):
 
         if not self.reference_no:
             self.reference_no = f"{random.randint(0,9)}{random.randint(0,9)}{random.randint(0,9)}"
         super().save(*args, **kwargs)
+
+class TransactionService(models.Model):
+    transaction = models.ForeignKey(to=Transaction, on_delete=models.SET_NULL, null=True)
+    service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
+    created_on = models.DateField(_("Created on"), default=timezone.now)
 
 class Scheme(models.Model):
     name = models.CharField(verbose_name="Name", max_length=256)

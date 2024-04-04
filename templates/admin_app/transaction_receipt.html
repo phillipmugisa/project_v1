@@ -1,0 +1,80 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-block: 1rem;
+        }
+        td, th {
+            border: 1px solid #000000;
+            padding: .5rem;
+        }
+
+        tr:nth-child(even){background-color: #f2f2f259;}
+
+        tr:hover {background-color: hsla(0, 0%, 95%, 0.301);}
+
+        th {
+            padding: .5rem;
+            text-align: left;
+            color: var(--primary-color);
+        }
+        span {
+            font-size: 1.2rem;
+            margin-block-end: 2px;
+            display: block;
+            font-weight: bold;
+        }
+    </style>
+
+</head>
+<body>
+    <section>
+        <div class="brief" style="text-align: center;">
+            <span>Reference No: {{ transaction.reference_no }}</span></br>
+            <span>Transaction Date: {{ transaction.created_on }}</span></br>
+            <span>Scheme No: {{ transaction.scheme.insurance_number }}</span></br>
+            <span>Scheme Name: {{ transaction.scheme.name }}</span></br>
+            {% if transaction.member %}
+            <span>Patient Name: {{ transaction.member.patient }}</span></br>
+            {% endif %}
+            <span>Total Amount Used: {{ transaction.amount_used }}</span></br>
+            {% if transaction.reason %}
+            <span>Transaction Reason: {{ transaction.reason }}</span></br>
+            {% endif %}
+        </div>
+        <table id="transaction_table">
+            <thead>
+                <tr>
+                    <th>Count</th>
+                    <th>Service</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ service.service.name }}</td>
+                    <td>{{ service.service.price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+
+<script>
+    print()
+</script>
+</html>
