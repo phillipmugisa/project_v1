@@ -1,5 +1,5 @@
-clinicMas/models.py
-clinic_db.py
+# clinicMas/models.py
+# clinic_db.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
