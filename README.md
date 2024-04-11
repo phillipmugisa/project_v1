@@ -9,19 +9,6 @@
     git https://github.com/phillipmugisa/project_v1.git
 
     cd project_v1
-
-    python -m venv venv
-
-    # linux
-    source ./venv/bin/activate
-
-    # windows
-    ./venv/Scripts/activate
-
-
-    pip install -r requirements.txt
-
-    python manage.py runserver
 ```
 
 ```python
