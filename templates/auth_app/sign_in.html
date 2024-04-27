@@ -1,8 +1,9 @@
 {% extends "utils/layout.html" %}
+{% load static %}
 {% block content %}
 <div class="auth-form form-area">
     <header>
-        <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 100px;;">
+        <img src="{% static 'images/logo.jpg' %}" alt="" style="block-size: 250px;;">
         <h3 class="title">Sign into your account</h3>
     </header>
     <form action="{% url 'auth_app:signin' %}" method="post">

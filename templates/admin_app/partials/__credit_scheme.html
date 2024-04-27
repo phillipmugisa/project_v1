@@ -9,6 +9,25 @@
             <label for="credit_account">Enter credit amount</label>
             <input type="number" name="credit_account" id="credit_account" min="0">
         </p>
+        <p>
+            <label for="transac">Transac</label>
+            <input type="text" name="transac" id="transac" min="0">
+        </p>
+        <p>
+            <label for="depositor">Depositor</label>
+            <input type="text" name="depositor" id="depositor" min="0">
+        </p>
+        <div style="display: flex;gap: 1rem;justify-self: flex-start;align-items: center;">
+            <label for="depositor">Payment Type</label>
+            <div style="display: flex;gap: 1rem">
+                <input type="checkbox" name="bank_payment" value="BANK" id="bank_payment">
+                <label for="bank_payment">Bank</label>
+            </div>
+            <div style="display: flex;gap: 1rem">
+                <input type="checkbox" name="cash_payment" value="CASH" id="cash_payment">
+                <label for="cash_payment">Cash</label>
+            </div>
+        </div>
         <input type="submit" class="btn btn-primary" value="Credit" name="credit">
     </form>
 </section>

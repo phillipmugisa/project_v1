@@ -102,6 +102,13 @@ class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
         print("schemes: ", schemes)
         return render(request, template_name=self.template_partial_scheme_list, context=self.context_data)
 
+
+class SchemeDeleteView(AdminAndAuthenticatedAccessMixin, View):
+    def get(self, request, insurance_number):
+        scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
+        scheme.delete()
+        return redirect(reverse("admin_app:schemes"))
+
 class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/scheme_details.html"
     template_partial_patient_list = "admin_app/partials/__patients_list.html"
@@ -179,6 +186,15 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
         if request.POST.get("credit"):
             credit_account = request.POST.get("credit_account")
 
+            transac = request.POST.get("transac")
+            depositor = request.POST.get("depositor")
+            bank_payment = request.POST.get("bank_payment")
+            cash_payment = request.POST.get("cash_payment")
+
+            payment_mode = cash_payment
+            if bank_payment:
+                payment_mode = payment_mode
+
             schemes = ManagerModels.Scheme.objects.filter(insurance_number = insurance_number)
             if not schemes:
                 messages.add_message(request, messages.ERROR, _("Record not found."))
@@ -189,7 +205,10 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
             scheme.save()
 
             transaction = ManagerModels.Transaction(
+                reference_no=transac,
                 reason = "Credit",
+                depositor = depositor,
+                payment_mode = payment_mode,
                 scheme=scheme,
                 amount_used=decimal.Decimal(str(credit_account)),
                 completed=True,
@@ -612,7 +631,8 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             amount_used = json_data.get("total_amount"),
             reason=f"Payment for Member: {member.patient}",
             completed=True,
-            authorised=True
+            authorised=True,
+            patient_type=json_data.get("patient_type")
         )
         
         try:

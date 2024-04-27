@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,9 +7,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Receipt</title>
+    <link rel="stylesheet" href="{% static 'css/utils.css' %}">
 
 
     <style>
+        
         table {
             border-collapse: collapse;
             width: 100%;
@@ -39,19 +41,39 @@
 
 </head>
 <body>
-    <section>
-        <div class="brief" style="text-align: center;">
-            <span>Reference No: {{ transaction.reference_no }}</span></br>
-            <span>Transaction Date: {{ transaction.created_on }}</span></br>
-            <span>Scheme No: {{ transaction.scheme.insurance_number }}</span></br>
-            <span>Scheme Name: {{ transaction.scheme.name }}</span></br>
-            {% if transaction.member %}
-            <span>Patient Name: {{ transaction.member.patient }}</span></br>
-            {% endif %}
-            <span>Total Amount Used: {{ transaction.amount_used }}</span></br>
-            {% if transaction.reason %}
-            <span>Transaction Reason: {{ transaction.reason }}</span></br>
-            {% endif %}
+    <section style="padding: 2rem;">
+        <div style="display: grid;grid-template-columns: 1fr 5fr;align-items: center;">
+            <img src="{% static 'images/logo.jpg' %}" alt="" style="height: 200px;width: 200px;">
+
+
+            <div style="display: grid;gap: 1rem;">
+                <h1 style="font-size: 24px;">ST. JOSEPH'S HOSPITAL, WAKISO</h1>
+                <div class="brief" style="text-align: center;display: grid; grid-template-columns: repeat(2, 1fr);justify-items: flex-start;gap: .5rem">
+                    <p style="display: flex;gap: .5rem;align-items: center;">Reference No: <span style="font-weight: 700;">{{ transaction.reference_no }}</span></p>
+                    <p style="display: flex;gap: .5rem;align-items: center;">Transaction Date: <span style="font-weight: 700;">{{ transaction.created_on }}</span></p>
+                    <p style="display: flex;gap: .5rem;align-items: center;">Scheme No: <span style="font-weight: 700;">{{ transaction.scheme.insurance_number }}</span></p>
+                    <p style="display: flex;gap: .5rem;align-items: center;">Scheme Name: <span style="font-weight: 700;">{{ transaction.scheme.name }}</span></p>
+                    {% if transaction.member %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Patient Name: <span style="font-weight: 700;">{{ transaction.member.patient }}</span></p>
+                    {% endif %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Total Amount Used: <span style="font-weight: 700;">{{ transaction.amount_used }}</span></p>
+                    {% if transaction.reason %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Transaction Reason: <span style="font-weight: 700;">{{ transaction.reason }}</span></p>
+                    {% endif %}
+                    
+                    {% if transaction.depositor %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Transaction Depositor: <span style="font-weight: 700;">{{ transaction.depositor }}</span></p>
+                    {% endif %}
+                    
+                    {% if transaction.payment_mode %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Transaction Payment Mode: <span style="font-weight: 700;">{{ transaction.payment_mode }}</span></p>
+                    {% endif %}
+                    
+                    {% if transaction.patient_type %}
+                    <p style="display: flex;gap: .5rem;align-items: center;">Transaction Patient Type: <span style="font-weight: 700;">{{ transaction.patient_type }}</span></p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <table id="transaction_table">
             <thead>

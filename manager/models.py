@@ -98,7 +98,7 @@ class PatientAddress(models.Model):
 class FamilyMember(models.Model):
     scheme = models.ForeignKey("Scheme", on_delete=models.SET_NULL, null=True, blank=True)
     patient = models.OneToOneField(Patient, on_delete=models.SET_NULL, null=True, unique=True)
-    status = models.BooleanField(default=False)
+    status = models.BooleanField(default=True)
     relationship = models.ForeignKey(to="RelationshipType", on_delete=models.SET_NULL, null=True)
     access_type = models.ForeignKey(to="AccessType", on_delete=models.SET_NULL, null=True)
     scheme_no = models.CharField(_("Scheme Number"), max_length=256, null=True, blank=True)
@@ -157,6 +157,9 @@ class Service(models.Model):
 class Transaction(models.Model):
     reference_no = models.CharField(verbose_name="reference number", max_length=256)
     reason = models.CharField(verbose_name="reason", max_length=256, null=True, blank=True)
+    depositor = models.CharField(db_column='Depositor', max_length=100, blank=True, null=True)
+    payment_mode = models.CharField(db_column='Payment Mode', max_length=100, blank=True, null=True)
+    patient_type = models.CharField(db_column='Patient Type', max_length=100, blank=True, null=True)
     member = models.ForeignKey(to=FamilyMember, on_delete=models.SET_NULL, null=True)
     scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True)
     amount_used = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)

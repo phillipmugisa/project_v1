@@ -15,6 +15,18 @@
                     <span class="title">Total Price: </span>
                     <span class="total-price" id="total_amount">0</span>
                 </div>
+                
+                <div style="display: flex;gap: 1rem;justify-self: flex-start;align-items: center;">
+                    <label for="depositor" class="title">Select Patient type</label>
+                    <div style="display: flex;gap: 0.5rem">
+                        <input type="checkbox" name="OPD" value="OPD" id="OPD">
+                        <label for="OPD">OPD</label>
+                    </div>
+                    <div style="display: flex;gap: 0.5rem">
+                        <input type="checkbox" name="INPATIENT" value="INPATIENT" id="INPATIENT">
+                        <label for="INPATIENT">INPATIENT</label>
+                    </div>
+                </div>
                 <div class="actions_area">
                     <button class="btn btn-primary" id="place_trans">Place Transaction</button>
                 </div>
@@ -59,10 +71,16 @@
 <script>
 
     document.querySelector("#place_trans").addEventListener("click", elem => {
+        if (!document.querySelector("#INPATIENT").checked && !document.querySelector("#OPD").checked) {
+            alert("Select Patient Type")
+            return
+        }
+        
         let data = {
             "patient": "",
             "services": [],
-            "total_amount": 0
+            "total_amount": 0,
+            "patient_type": document.querySelector("#INPATIENT").checked ? document.querySelector("#INPATIENT").value : document.querySelector("#OPD").value
         }
 
         let services_list = [];

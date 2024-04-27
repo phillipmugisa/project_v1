@@ -159,7 +159,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "auth_app.User"
 
-CSRF_TRUSTED_ORIGINS = ['https://b6be-41-75-177-18.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://ef78-41-75-179-86.ngrok-free.app']
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
