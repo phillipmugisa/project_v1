@@ -624,6 +624,8 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             response_data = {'error': f'Total ammount({json_data.get("total_amount")}) exceed scheme credit({scheme.credit})'}
             return JsonResponse(response_data)
 
+        total_amount = json_data.get("total_amount") * (100 - json_data.get("discount")) / 100
+
         # create transaction
         transaction = ManagerModels.Transaction.objects.create(
             member = member,

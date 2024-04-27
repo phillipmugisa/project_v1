@@ -15,6 +15,10 @@
                     <span class="title">Total Price: </span>
                     <span class="total-price" id="total_amount">0</span>
                 </div>
+                <div class="price">
+                    <span class="title">Discount(%): </span>
+                    <input type="number" name="" id="discount" min="0" max="100" value="5" style="padding: .5rem 1rem;">
+                </div>
                 
                 <div style="display: flex;gap: 1rem;justify-self: flex-start;align-items: center;">
                     <label for="depositor" class="title">Select Patient type</label>
@@ -80,7 +84,8 @@
             "patient": "",
             "services": [],
             "total_amount": 0,
-            "patient_type": document.querySelector("#INPATIENT").checked ? document.querySelector("#INPATIENT").value : document.querySelector("#OPD").value
+            "patient_type": document.querySelector("#INPATIENT").checked ? document.querySelector("#INPATIENT").value : document.querySelector("#OPD").value,
+            "discount": document.querySelector("#discount").value
         }
 
         let services_list = [];
@@ -167,7 +172,12 @@
             let price = parseFloat(elem.dataset["price"])
             total_amount = total_amount + price
         })
-        document.querySelector("#total_amount").textContent = total_amount
+        
+        // applied discount
+        let discount = document.querySelector("#discount").value
+        new_total_amount = total_amount * (100 - discount) / 100
+
+        document.querySelector("#total_amount").innerHTML = `<span>${new_total_amount}</span>  <s style="font-size:.8rem">${total_amount}</s>`
     }
 
     const displaySelectedService = (elem) => {
