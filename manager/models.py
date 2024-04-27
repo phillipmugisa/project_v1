@@ -125,7 +125,7 @@ class FamilyMember(models.Model):
         if self.patient.nationalidno:
             sn = sn + f"{self.patient.nationalidno}"
             
-        sn = sn + f"{self.patient.birthdate.year}/{datetime.now().strftime("%Y-%m-%d")}"
+        sn = sn + f"{self.patient.birthdate.year}/{datetime.now().strftime('%Y-%m-%d')}"
         return sn
 
 
