@@ -190,6 +190,7 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
             depositor = request.POST.get("depositor")
             bank_payment = request.POST.get("bank_payment")
             cash_payment = request.POST.get("cash_payment")
+            date = request.POST.get("date")
 
             payment_mode = cash_payment
             if bank_payment:
@@ -211,6 +212,7 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
                 payment_mode = payment_mode,
                 scheme=scheme,
                 amount_used=decimal.Decimal(str(credit_account)),
+                created_on=date,
                 completed=True,
                 authorised=True,
             )
@@ -624,13 +626,13 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             response_data = {'error': f'Total ammount({json_data.get("total_amount")}) exceed scheme credit({scheme.credit})'}
             return JsonResponse(response_data)
 
-        total_amount = json_data.get("total_amount") * (100 - json_data.get("discount")) / 100
+        total_amount = json_data.get("total_amount") * (100 - int(json_data.get("discount"))) / 100
 
         # create transaction
         transaction = ManagerModels.Transaction.objects.create(
             member = member,
             scheme=scheme,
-            amount_used = json_data.get("total_amount"),
+            amount_used = total_amount,
             reason=f"Payment for Member: {member.patient}",
             completed=True,
             authorised=True,
@@ -701,7 +703,7 @@ class POSSchemesView(AdminAndAuthenticatedAccessMixin, View):
             schemes = ManagerModels.Scheme.objects.filter(Q(name__icontains=scheme_keyword) | Q(insurance_number__icontains=scheme_keyword))
             self.context_data["schemes"] = schemes
         else:
-            self.context_data["schemes"] = ManagerModels.Scheme.objects.all()[:10]
+            self.context_data["schemes"] = ManagerModels.Scheme.objects.all()
 
         return render(request, template_name=self.__partial_template, context=self.context_data)
 
@@ -721,7 +723,7 @@ class TransactionsView(AdminAndAuthenticatedAccessMixin, View):
             
             return render(request, template_name=self.receipt_template_name, context=self.context_data)
         else:
-            transactions = ManagerModels.Transaction.objects.all()
+            transactions = ManagerModels.Transaction.objects.all().order_by("-id")
             self.context_data["transactions"] = transactions
 
         return render(request, template_name=self.template_name, context=self.context_data)

@@ -1,5 +1,7 @@
 # clinicMas/models.py
 # clinic_db.py
+mydatabase.sqlite3
+*.sqlite3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
