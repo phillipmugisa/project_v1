@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt</title>
+</head>
+<body>
+    <h2>Dear {{ principal.patient }}</h2>
+    <p>{{ message }}</p>
+
+    <div style="margin-top: 10px;">
+        <h3>Transaction Details</h3>
+        <ul style="list-style-position: inside;">
+            {% if transaction.transac %}
+            <li style="margin-top: 5px;">
+                <b>Transaction Id</b>: {{ transaction.transac }}
+            </li>
+            {% endif %}
+            <li style="margin-top: 5px;">
+                <b>Transaction Date</b>: {{ transaction.created_on }}
+            </li>
+            <li style="margin-top: 5px;">
+                <b>Transaction Type</b>: {{ transaction.reason }}
+            </li>
+            <li style="margin-top: 5px;">
+                <b>Transaction Amount</b>: {{ transaction.amount_used }}
+            </li>
+            {% if transaction.depositor %}
+            <li style="margin-top: 5px;">
+                <b>Depositor</b>: {{ transaction.depositor }}
+            </li>
+            {% endif %}
+            {% if transaction.payment_mode %}
+            <li style="margin-top: 5px;">
+                <b>Payment Mode</b>: {{ transaction.payment_mode }}
+            </li>
+            {% endif %}
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

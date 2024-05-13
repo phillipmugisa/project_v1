@@ -13,11 +13,9 @@ import os, json
 from django.http import JsonResponse
 
 from django.conf import settings
-from django.core.mail import send_mail
 
-from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 from manager import models as ManagerModels
 from clinicMas import models as ClinicModels
@@ -354,7 +352,7 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
             )
             transaction.save()
 
-            notify_principle(scheme=scheme, message=f"{str(credit_account)} credit added to your scheme.")
+            notify_principle(request, "Scheme Credit", scheme, transaction, f"This email is to inform you that UGX {str(transaction.amount_used)} has been credited to your scheme {scheme.name}.")
 
             # TODO: make redirect
             self.context_data["scheme"] = scheme
@@ -759,7 +757,7 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
         scheme = member.scheme
         
         if scheme.credit < json_data.get("total_amount") and not scheme.scheme_type.canExceedCredit:
-            response_data = {'error': f'Total ammount({json_data.get("total_amount")}) exceed scheme credit({scheme.credit})'}
+            response_data = {'error': f'Total amount({json_data.get("total_amount")}) exceed scheme credit({scheme.credit})'}
             return JsonResponse(response_data)
 
         total_amount = json_data.get("total_amount") * (100 - int(json_data.get("discount"))) / 100
@@ -796,6 +794,8 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             transaction.delete()
             response_data = {'error': 'Error processing data'}
             return JsonResponse(response_data)
+
+        notify_principle(request, transaction.reason, scheme, transaction, f"This email is to inform you that UGX {str(transaction.amount_used)} has been debited from your scheme {scheme.name} for beneficiary {member.patient}.")
 
         response_data = {'message': 'Data received successfully', "transaction_ref": transaction.reference_no}
         return JsonResponse(response_data, status=200)
@@ -907,6 +907,45 @@ def clone_patient(cm_patient, commit=True):
 
     return patient
 
-def notify_principle(scheme, message):
+def notify_principle(request, subject, scheme, transaction, message):
     # send email to scheme principle
-    pass
+
+    # get scheme principle
+    principals = ManagerModels.FamilyMember.objects.filter(scheme=scheme, relationship__name__icontains="princi")
+    if principals:
+        principal = principals.first()
+
+        if not principal.patient.email:
+            messages.add_message(request, messages.ERROR, _("Principal email not found."))
+            return
+
+        try:
+            email_body = render_to_string(
+                "email_receipt.html",
+                {
+                    "principal": principal,
+                    "message": message,
+                    "transaction": transaction,
+                    "scheme": scheme
+                },
+            )
+            email = EmailMessage(
+                subject = subject,
+                body = email_body,
+                from_email = settings.SUPPORT_EMAIL,
+                to = [principal.patient.email],
+                reply_to = [settings.SUPPORT_EMAIL]
+            )
+            email.content_subtype = 'html'
+            # if image_url:
+            #     email.attach_file('image_url')
+
+            email.send(fail_silently=False)
+        except:
+            messages.add_message(request, messages.ERROR, _("Error sending email receipt."))
+
+        messages.add_message(request, messages.SUCCESS, _(f"Transaction receipt to {principal.patient}"))
+    else:
+        messages.add_message(request, messages.ERROR, _("Email not sent. not principal found."))
+
+        
