@@ -24,8 +24,13 @@ from clinicMas import models as ClinicModels
 from manager import forms as ManagerForms
 from admin_app.mixins import AdminAndAuthenticatedAccessMixin
 
-import random
-from openpyxl import load_workbook
+import random, os
+from openpyxl import load_workbook, Workbook
+from io import BytesIO
+from openpyxl.styles import Font
+from openpyxl.drawing.image import Image
+
+from django.conf import settings
 
 
 class HomeView(AdminAndAuthenticatedAccessMixin, View):
@@ -164,7 +169,138 @@ class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
         self.context_data["patients"] = group_patients(patients)
         return render(request, template_name=self.template_partial_patient_list, context=self.context_data)
 
+class EditAccountView(AdminAndAuthenticatedAccessMixin, View):
+    template_partial_confirm_form = "admin_app/partials/__edit_scheme.html"
+    template_partial_scheme_home = "admin_app/partials/__scheme_home_html"
+    context_data = {}
 
+    def get(self, request, insurance_number):
+        schemes = ManagerModels.Scheme.objects.filter(insurance_number = insurance_number)
+        if not schemes:
+            messages.add_message(request, messages.ERROR, _("Record not found."))
+            return redirect(reverse("admin_app:schemes"))
+
+        scheme = schemes.first()
+        self.context_data["scheme"] = scheme
+        
+        return render(request, template_name=self.template_partial_confirm_form, context=self.context_data)
+
+    def post(self, request, insurance_number):
+        if request.POST.get("account_name"):
+            account_name = request.POST.get("account_name")
+            
+            schemes = ManagerModels.Scheme.objects.filter(insurance_number = insurance_number)
+            if not schemes:
+                messages.add_message(request, messages.ERROR, _("Record not found."))
+                return redirect(reverse("admin_app:schemes"))
+
+            scheme = schemes.first()
+            scheme.name = account_name
+            scheme.save()
+            
+            return redirect(reverse("admin_app:scheme-details", args=[insurance_number]))
+
+
+class SchemeTransactionStatementView(AdminAndAuthenticatedAccessMixin, View):
+    template_name = "admin_app/partials/__scheme_home_html"
+    context_data = {}
+
+    header_end_row = 15
+    excel_cols = [
+        {"column": "A", "name": "Date"},
+        {"column": "B", "name": "Name"},
+        {"column": "C", "name": "Service"},
+        {"column": "D", "name": "Debit"},
+        {"column": "E", "name": "Credit"},
+        {"column": "F", "name": "Cummulative Balanace"},
+    ]
+
+    def get(self, request, insurance_number):
+        schemes = ManagerModels.Scheme.objects.filter(insurance_number = insurance_number)
+        if not schemes:
+            messages.add_message(request, messages.ERROR, _("Record not found."))
+            return redirect(reverse("admin_app:schemes"))
+
+        scheme = schemes.first()
+    
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = scheme.name
+
+        # Load the image file
+        img = Image(os.path.join(settings.BASE_DIR , "static/images/statement header.jpg"))
+        
+        # Resize the image as per the cell size
+        img.width = 800
+        img.height = 250
+        
+        # Add the image to the worksheet in cells A1 to F1
+        sheet.add_image(img, 'A1')
+
+        # write table column names
+        for col in self.excel_cols:
+            sheet[f"{col["column"]}{self.header_end_row}"] = col["name"]
+
+        # Create a Font object for bold style
+        bold_font = Font(bold=True)
+        
+        # Apply bold font to the entire row
+        for row in sheet.iter_rows(min_row=self.header_end_row, max_row=self.header_end_row):  # Iterate over the first row
+            for cell in row:
+                cell.font = bold_font
+        
+        # get scheme transactions in ascending order(old to new)
+        transactions = ManagerModels.Transaction.objects.filter(scheme=scheme)
+        if not transactions:
+            # empty worksheet
+            pass
+        
+        i = 1
+        init_account = 0
+        for transaction in transactions:
+
+            # get transcation services
+            services = ManagerModels.TransactionService.objects.filter(transaction=transaction)
+            if services:
+                for service in services:
+                
+                    init_account = init_account - service.service.price
+                    sheet[f"{self.excel_cols[0]["column"]}{self.header_end_row + i}"] = transaction.created_on # Date
+                    sheet[f"{self.excel_cols[1]["column"]}{self.header_end_row + i}"] = f"{transaction.member.patient.firstname} {transaction.member.patient.lastname}" # Name
+                    sheet[f"{self.excel_cols[2]["column"]}{self.header_end_row + i}"] = service.service.name # Service
+                    sheet[f"{self.excel_cols[3]["column"]}{self.header_end_row + i}"] = service.service.price # Debit
+                    sheet[f"{self.excel_cols[4]["column"]}{self.header_end_row + i}"] = "" # Credit
+                    sheet[f"{self.excel_cols[5]["column"]}{self.header_end_row + i}"] = init_account # Cummulative Balanace
+                    i = i + 1
+            else:
+                # credit transaction
+                if transaction.reason.lower() == "credit":
+                
+                    init_account = init_account + transaction.amount_used
+                    sheet[f"{self.excel_cols[0]["column"]}{self.header_end_row + i}"] = transaction.created_on # Date
+                    sheet[f"{self.excel_cols[1]["column"]}{self.header_end_row + i}"] = transaction.depositor #name
+                    sheet[f"{self.excel_cols[2]["column"]}{self.header_end_row + i}"] = "DEPOSIT" # Service
+                    sheet[f"{self.excel_cols[3]["column"]}{self.header_end_row + i}"] = "" # Debit
+                    sheet[f"{self.excel_cols[4]["column"]}{self.header_end_row + i}"] = transaction.amount_used # Credit
+                    sheet[f"{self.excel_cols[5]["column"]}{self.header_end_row + i}"] = init_account # Cummulative Balanace
+                    i = i + 1
+                else:
+                    # not credit
+                    pass
+
+            
+        # Create a BytesIO object to save the workbook
+        output = BytesIO()
+        workbook.save(output)
+        # Rewind the buffer
+        output.seek(0)
+        
+        # Create a HttpResponse object with the Excel content type
+        response = HttpResponse(output, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        # Set the file name
+        response['Content-Disposition'] = f'attachment; filename={scheme.name}.xlsx'
+        return response
+    
 
 class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
     template_partial_confirm_form = "admin_app/partials/__credit_scheme.html"

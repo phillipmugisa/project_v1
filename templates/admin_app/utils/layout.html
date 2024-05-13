@@ -22,7 +22,7 @@
     <nav class="grid">
         <div class="tabs left-tabs grid">
             <a href="{% url 'admin_app:home' %}" class="logo">
-                <img src="https://www.jotellug.com/images/logo.jpg" alt="" style="block-size: 5vh;">
+                <img src="{% static 'images/logo.jpg' %}" alt="" style="block-size: 5vh;">
             </a>
             <a class="btn tab" href="{% url 'admin_app:home' %}">Home</a>
             <a class="btn tab" href="{% url 'admin_app:schemes' %}">Schemes</a>
@@ -31,6 +31,8 @@
             <a class="btn tab" href="{% url 'admin_app:transactions' %}">Transactions</a>
         </div>
         <div class="tabs right-tabs grid">
+            <p class="tab btn text-success">Logged in as {{request.user.username}}</p>
+            <a class="tab btn" href="{% url 'auth_app:profile' %}">Profile</a>
             <a class="tab btn btn-primary" href="{% url 'auth_app:logout' %}">Logout</a>
         </div>
     </nav>

@@ -10,13 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-import os
+import os, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
 
 # Load .env file
 load_dotenv()
+
+# if not os.environ.get("LICENCE", None):
+#     raise("Provide license")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -142,7 +145,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_URL = "static/"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
@@ -159,7 +161,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "auth_app.User"
 
-CSRF_TRUSTED_ORIGINS = ['https://ef78-41-75-179-86.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://c846-41-75-182-20.ngrok-free.app']
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

@@ -6,6 +6,8 @@
 
             <div class="actions">
                 <a href="" hx-get="{% url 'admin_app:scheme-credit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader" class="btn btn-success">Credit account</a>
+                <a href="" hx-get="{% url 'admin_app:scheme-edit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader"  class="btn btn-success">Edit Account</a>
+                <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-success">Excel Statement</a>
                 <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" hx-target="#app-wrapper" hx-indicator=".loader">
                     {% csrf_token %}
                     {% if scheme.status %}

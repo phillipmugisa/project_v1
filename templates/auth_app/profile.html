@@ -1,0 +1,15 @@
+{% extends "utils/layout.html" %}
+{% load static %}
+{% block content %}
+<div class="auth-form form-area">
+    <header>
+        <img src="{% static 'images/logo.jpg' %}" alt="" style="block-size: 100px;;">
+        <h3 class="title">Edit your account</h3>
+    </header>
+    <form action="{% url 'auth_app:profile' %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
+</div>
+{% endblock %}

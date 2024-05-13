@@ -12,6 +12,8 @@
                 <th>Credit</th>
                 <th>Status</th>
                 <th>Creation Date</th>
+                <th>Invoices</th>
+                <th>Statement</th>
                 <th>Details</th>
                 <th>Action</th>
             </tr>
@@ -37,6 +39,12 @@
                     {% endif %}
                 </td>
                 <td>{{ scheme.created_on }}</td>
+                <td>
+                    <a href="" class="btn btn-access btn-table-actions">10 Invoices</a>
+                </td>
+                <td>
+                    <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-access btn-table-actions">Excel</a>
+                </td>
                 <td>
                     <a href="{% url 'admin_app:scheme-details' scheme.insurance_number %}" class="btn btn-access btn-table-actions">Details</a>
                 </td>

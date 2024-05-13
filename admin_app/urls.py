@@ -9,6 +9,8 @@ urlpatterns = [
     path("schemes/<int:insurance_number>/", AdminAppViews.SchemeDetailsView.as_view(), name="scheme-details"),
     path("schemes/<int:insurance_number>/delete", AdminAppViews.SchemeDeleteView.as_view(), name="scheme-delete"),
     path("schemes/<int:insurance_number>/credit", AdminAppViews.CreditAccountView.as_view(), name="scheme-credit"),
+    path("schemes/<int:insurance_number>/edit", AdminAppViews.EditAccountView.as_view(), name="scheme-edit"),
+    path("schemes/<int:insurance_number>/statements", AdminAppViews.SchemeTransactionStatementView.as_view(), name="scheme-statement"),
     path("schemes/create", AdminAppViews.SchemeCreateView.as_view(), name="create-scheme"),
     path("schemes/<int:insurance_number>/patient/<int:patientno>/", AdminAppViews.SchemmePatientView.as_view(), name="scheme-patient"),
 

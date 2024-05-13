@@ -1,0 +1,15 @@
+{% block content %}
+<section class="grid with-form" id="create_scheme">
+    <header>
+        <h3 class="title">Edit {{ scheme.name }} scheme</h3>
+    </header>
+    <form action="{% url 'admin_app:scheme-edit' scheme.insurance_number %}" method="POST">
+        {% csrf_token %}
+        <p>
+            <label for="account_name">Scheme name</label>
+            <input type="text" name="account_name" id="account_name" value="{{scheme.name}}">
+        </p>
+        <input type="submit" class="btn btn-primary" value="Save" name="edit">
+    </form>
+</section>
+{% endblock %}
