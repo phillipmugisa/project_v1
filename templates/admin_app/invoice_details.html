@@ -1,0 +1,118 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<main>
+    <div class="page-brief">
+        <p>{{ scheme.name }} Scheme</p>
+
+        <div class="actions">
+            <a href="" hx-get="{% url 'admin_app:scheme-credit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader" class="btn btn-success">Credit account</a>
+            <a href="" hx-get="{% url 'admin_app:scheme-edit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader"  class="btn btn-success">Edit Account</a>
+            <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-access">Excel Statement</a>
+            <a href="{% url 'admin_app:scheme-invoices' scheme.insurance_number %}" class="btn btn-access">View Invoices</a>
+            <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" hx-target="#app-wrapper" hx-indicator=".loader">
+                {% csrf_token %}
+                {% if scheme.status %}
+                    <input type="submit" value="Suspend Account" name="suspend_acount" class="btn btn-danger">
+                {% else %}
+                    <input type="submit" value="Activate Account" name="activate_acount" class="btn btn-success">
+                {% endif %}
+            </form>
+            <a href="{% url 'admin_app:scheme-delete' scheme.insurance_number %}" class="btn btn-danger">Delete Account</a>
+        </div>
+    </div>
+    <div id="swappable" class="grid">
+        {% for invoice in invoices %}
+            <section class="grid table-area">
+                <header>
+                    <h3 class="title">Invoice {{ invoice.invoice.invoiceno }}</h3>
+                </header>
+                <hr>
+                <div style="display: grid; gap: 1rem;grid-template-columns: repeat(2, 1fr);">
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Invoice Number:</span> <span>{{ invoice.invoice.invoiceno }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Amount:</span> <span>{{ invoice.invoice.amount }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Amount Paid:</span> <span>{{ invoice.invoice.amountpaid }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Amount Words:</span> <span>{{ invoice.invoice.amountwords }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Invoice Date:</span> <span>{{ invoice.invoice.invoicedate }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Visit Number:</span> <span>{{ invoice.visit.visitno }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;">
+                        <span style="font-weight: 700;">Member:</span> <span>{{ invoice.member.patient }}</span>
+                    </p>
+                </div>
+            </section>
+
+            <hr>
+            
+            <section class="grid table-area">
+                <header>
+                    <h3 class="title">Services/Items</h3>
+                </header>
+                <hr>
+                <table id="services-list">
+                    <thead>
+                        <tr>
+                            <th>VisitNo</th>
+                            <th>Item Code</th>
+                            <th>Item Number</th>
+                            <th>Quantity</th>
+                            <th>Unit Cost</th>
+                            <th>Unit Price</th>
+                            <th>Discount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in invoice.services %}
+                        <tr>
+                            <td>
+                                {{ service.visitno.visitno }}
+                            </td>
+                            <td>
+                                {{ service.itemcode }}
+                            </td>
+                            <td>
+                                {{ service.itemname }}
+                            </td>
+                            <td>
+                                {{ service.quantity }}
+                            </td>
+                            <td>
+                                {{ service.unitcost }}
+                            </td>
+                            <td>
+                                {{ service.unitprice }}
+                            </td>
+                            <td>
+                                {{ service.discount }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+            <hr>
+            {% if invoice.recorded == False %}
+            <form action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post" style="display: grid;gap: 2rem;grid-template-columns: repeat(1, 1fr);margin-bottom: 5rem;">
+                {% csrf_token %}
+                <!-- <input type="submit" value="Decline invoice" name="suspend_acount" class="btn btn-danger"> -->
+                <input type="submit" value="Approve Invoice" name="activate_acount" class="btn btn-success">
+            </form>
+            {% endif %}
+        {% endfor %}
+    </div>
+</main>
+
+<script>
+    $(`#services-list`).DataTable()
+</script>
+{% endblock %}

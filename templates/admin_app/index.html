@@ -14,9 +14,9 @@
         </div>
         <div class="quick-links grid">
             <a class="link" hx-get="{% url 'admin_app:create-scheme' %}" hx-target="#swappable" hx-indicator=".loader">Create Scheme</a>
-            <a class="link" href="">Add Patient</a>
-            <a class="link" href="">View Logs</a>
-            <a class="link" href="">View Transactions</a>
+            <a class="link" href="{% url 'admin_app:schemes' %}">Schemes</a>
+            <a class="link" href="{% url 'admin_app:pos' %}">Point of Sale</a>
+            <a class="link" href="{% url 'admin_app:transactions' %}">View Transactions</a>
         </div>
     </div>
     <div id="swappable" class="grid">

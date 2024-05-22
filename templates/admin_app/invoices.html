@@ -1,0 +1,90 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<main>
+    <div class="page-brief">
+        <p>{{ scheme.name }} Scheme</p>
+
+        <div class="actions">
+            <a href="" hx-get="{% url 'admin_app:scheme-credit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader" class="btn btn-success">Credit account</a>
+            <a href="" hx-get="{% url 'admin_app:scheme-edit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader"  class="btn btn-success">Edit Account</a>
+            <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-access">Excel Statement</a>
+            <a href="{% url 'admin_app:scheme-invoices' scheme.insurance_number %}" class="btn btn-access">View Invoices</a>
+            <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" hx-target="#app-wrapper" hx-indicator=".loader">
+                {% csrf_token %}
+                {% if scheme.status %}
+                    <input type="submit" value="Suspend Account" name="suspend_acount" class="btn btn-danger">
+                {% else %}
+                    <input type="submit" value="Activate Account" name="activate_acount" class="btn btn-success">
+                {% endif %}
+            </form>
+            <a href="{% url 'admin_app:scheme-delete' scheme.insurance_number %}" class="btn btn-danger">Delete Account</a>
+        </div>
+    </div>
+    <div id="swappable" class="grid">
+        <section class="grid table-area">
+            <header>
+                <h3 class="title">Invoices</h3>
+            </header>
+            <table id="scheme_invoices">
+                <thead>
+                    <tr>
+                        <th>InvoiceNo</th>
+                        <th>Visit No.</th>
+                        <th>Member</th>
+                        <th>Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Invoice Date</th>
+                        <th>Details</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    {% if invoice.invoice %}
+                        {% if invoice.recorded %}
+                        <tr style="background-color: lightblue">
+                        {% else %}
+                        <tr>
+                        {% endif %}
+                            <td>
+                                {{ invoice.invoice.invoiceno }}
+                            </td>
+                            <td>
+                                {{ invoice.visit.visitno }}
+                            </td>
+                            <td>
+                                {{ invoice.member.patient }}
+                            </td>
+                            <td>
+                                {{ invoice.invoice.amount }}
+                            </td>
+                            <td>
+                                {{ invoice.invoice.amountpaid }}
+                            </td>
+                            <td>
+                                {{ invoice.invoice.invoicedate }}
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" class="btn btn-access btn-table-actions">View Details</a>
+                            </td>
+                            <td>
+                                {% if invoice.recorded == False %}
+                                <form action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post">
+                                    {% csrf_token %}
+                                    <input type="submit" value="Approve" name="activate_acount" class="btn btn-success btn-table-actions">
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+</main>
+
+<script>
+    $(`#scheme_invoices`).DataTable()
+</script>
+{% endblock %}

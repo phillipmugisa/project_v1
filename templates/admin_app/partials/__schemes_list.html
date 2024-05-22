@@ -40,7 +40,7 @@
                 </td>
                 <td>{{ scheme.created_on }}</td>
                 <td>
-                    <a href="" class="btn btn-access btn-table-actions">10 Invoices</a>
+                    <a href="{% url 'admin_app:scheme-invoices' scheme.insurance_number %}" class="btn btn-access btn-table-actions">View Invoices</a>
                 </td>
                 <td>
                     <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-access btn-table-actions">Excel</a>

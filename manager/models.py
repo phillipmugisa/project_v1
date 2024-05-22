@@ -163,6 +163,7 @@ class Transaction(models.Model):
     member = models.ForeignKey(to=FamilyMember, on_delete=models.SET_NULL, null=True)
     scheme = models.ForeignKey(to="Scheme", on_delete=models.SET_NULL, null=True)
     amount_used = models.DecimalField(verbose_name="Amount Used", decimal_places=2, max_digits=12, blank=True, null=True)
+    discount = models.DecimalField(verbose_name="Discount", decimal_places=2, max_digits=12, blank=True, null=True)
     completed = models.BooleanField(default=False)
     authorised = models.BooleanField(default=False)
     created_on = models.DateField(_("Created on"), default=timezone.now)

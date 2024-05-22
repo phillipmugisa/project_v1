@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound
 from django.urls import reverse
 from django.views import View
@@ -29,6 +30,9 @@ from openpyxl.styles import Font
 from openpyxl.drawing.image import Image
 
 from django.conf import settings
+
+import requests
+import urllib.parse
 
 
 class HomeView(AdminAndAuthenticatedAccessMixin, View):
@@ -67,6 +71,99 @@ class HomeView(AdminAndAuthenticatedAccessMixin, View):
         self.context_data["schemes"] = schemes
         return render(request, template_name=self.template_partial_scheme_list, context=self.context_data)
 
+
+class SchemeInvoicesView(AdminAndAuthenticatedAccessMixin, View):
+    template_name = "admin_app/invoices.html"
+    context_data = {}
+
+    def get(self, request, insurance_number):
+        scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
+        self.context_data["scheme"] = scheme
+        
+        # get scheme members
+        invoices = get_scheme_invoices(scheme)
+        
+        self.context_data["invoices"] = invoices
+
+        return render(request, template_name=self.template_name, context=self.context_data)
+
+    def post(self, request):
+        pass
+
+class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
+    template_name = "admin_app/invoice_details.html"
+    context_data = {}
+
+    def get(self, request, insurance_number, invoiceno):
+        scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
+        self.context_data["scheme"] = scheme
+        
+        # get scheme members
+        invoices = []
+        for invoice in get_scheme_invoices(scheme):
+            if invoice.get("invoice", None) and invoice["invoice"].invoiceno == invoiceno:
+                invoices.append(invoice)
+
+        self.context_data["invoices"] = invoices
+
+        return render(request, template_name=self.template_name, context=self.context_data)
+
+    def post(self, request, insurance_number, invoiceno):
+        scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
+        self.context_data["scheme"] = scheme
+        
+        # get scheme members
+        invoices = []
+        for invoice in get_scheme_invoices(scheme):
+            if invoice["invoice"].invoiceno == invoiceno:
+                invoices.append(invoice)
+
+        invoice = invoices[0]
+        member = invoice["member"]
+
+        # record in our db
+        transaction = ManagerModels.Transaction.objects.create(
+            reference_no=invoice["invoice"].invoiceno,
+            member = member,
+            scheme=scheme,
+            amount_used = invoice["invoice"].amountpaid,
+            discount=0,
+            reason=f"Payment for Member: {member.patient}",
+            completed=True,
+            authorised=True,
+            patient_type="Not Specified",
+            created_on=invoice["invoice"].invoicedate
+        )
+        
+        try:
+            for service in invoice["services"]:                
+                service_record = ManagerModels.Service.objects.filter(Q(code__iexact=service.itemcode) | Q(name__iexact=service.itemname))
+                if not service_record:
+                    service = ManagerModels.Service.objects.create(
+                        code=service.itemcode,
+                        name=service.itemname,
+                        price=service.unitprice,
+                    )
+                else:
+                    print(service_record)
+                    service = service_record.first()
+
+                ManagerModels.TransactionService.objects.create(
+                    service = service,
+                    transaction = transaction
+                )
+
+                # reduce scheme credit
+                scheme.credit = scheme.credit - service.price
+                scheme.save()
+        except Exception as Err:
+            transaction.delete()
+            messages.add_message(request, messages.ERROR, _("Error processing data."))
+            return redirect(reverse("admin_app:scheme-invoices-details", args=[insurance_number, invoiceno]))
+
+        notify_principle(request, transaction.reason, scheme, transaction, f"This notification is to inform you that UGX {str(transaction.amount_used)} has been debited from your scheme {scheme.name} for beneficiary {member.patient}.")
+
+        return redirect(reverse("admin_app:scheme-invoices", args=[insurance_number]))
 
 class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/schemes.html"
@@ -352,7 +449,7 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
             )
             transaction.save()
 
-            notify_principle(request, "Scheme Credit", scheme, transaction, f"This email is to inform you that UGX {str(transaction.amount_used)} has been credited to your scheme {scheme.name}.")
+            notify_principle(request, "Scheme Credit", scheme, transaction, f"This notification is to inform you that UGX {str(transaction.amount_used)} has been credited to your scheme {scheme.name}.")
 
             # TODO: make redirect
             self.context_data["scheme"] = scheme
@@ -767,6 +864,7 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             member = member,
             scheme=scheme,
             amount_used = total_amount,
+            discount=float(json_data.get("discount")),
             reason=f"Payment for Member: {member.patient}",
             completed=True,
             authorised=True,
@@ -795,7 +893,7 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             response_data = {'error': 'Error processing data'}
             return JsonResponse(response_data)
 
-        notify_principle(request, transaction.reason, scheme, transaction, f"This email is to inform you that UGX {str(transaction.amount_used)} has been debited from your scheme {scheme.name} for beneficiary {member.patient}.")
+        notify_principle(request, transaction.reason, scheme, transaction, f"This notification is to inform you that UGX {str(transaction.amount_used)} has been debited from your scheme {scheme.name} for beneficiary {member.patient}.")
 
         response_data = {'message': 'Data received successfully', "transaction_ref": transaction.reference_no}
         return JsonResponse(response_data, status=200)
@@ -909,6 +1007,52 @@ def clone_patient(cm_patient, commit=True):
 
 def notify_principle(request, subject, scheme, transaction, message):
     # send email to scheme principle
+    send_email(request, subject, scheme, transaction, message)
+    send_sms(request, subject, scheme, transaction, message)
+
+def send_sms(request, subject, scheme, transaction, message):
+    principals = ManagerModels.FamilyMember.objects.filter(scheme=scheme, relationship__name__icontains="princi")
+    if principals:
+        principal = principals.first()
+
+        if not principal.patient.phone:
+            messages.add_message(request, messages.ERROR, _("Principal number not found."))
+            return
+
+        print(message)
+
+        url = "http://text.emediauganda.com/api.php"
+        user = "Stjosephshospital"
+        password = "Hospital"
+        sender = urllib.parse.quote("Wsbetting")
+        message = urllib.parse.quote(message)
+        print(message)
+
+        # reciever = f"{principal.patient.phone}"
+
+        reciever = "0782047612"
+
+        payload = {
+            'user': user,
+            'password': password,
+            'sender': sender,
+            'message': message,
+            'reciever': reciever
+        }
+
+        response = requests.post(url, data=payload)
+        result = response.text    
+
+        # Check if the result starts with '1701'
+        if result.startswith('1701'):
+            messages.add_message(request, messages.SUCCESS, _("SMS has been delivered on our side."))
+        else:
+            print(f"SMS delivery failed. Response: {result}")
+    else:
+        messages.add_message(request, messages.ERROR, _("Sms not sent. No principal found."))
+
+def send_email(request, subject, scheme, transaction, message):
+    # send email to scheme principle
 
     # get scheme principle
     principals = ManagerModels.FamilyMember.objects.filter(scheme=scheme, relationship__name__icontains="princi")
@@ -948,4 +1092,35 @@ def notify_principle(request, subject, scheme, transaction, message):
     else:
         messages.add_message(request, messages.ERROR, _("Email not sent. not principal found."))
 
-        
+def get_scheme_invoices(scheme):
+
+    invoices = []
+    members = ManagerModels.FamilyMember.objects.filter(scheme=scheme)
+
+    for member in members:
+        invoice_item = {}
+        invoice_item["member"] = member
+        for visit in ClinicModels.Visits.objects.using("clinic").filter(patientno=member.patient.patientno):
+            invoice_item["visit"] = visit
+            invoice_item["services"] = []
+            # get invoice details
+            for service in ClinicModels.Items.objects.using("clinic").filter(visitno=visit.visitno):
+                invoice_item["services"].append(service)
+                invoiceno = service.invoiceno
+
+            # get invoice details
+            details = ClinicModels.Invoicedetails.objects.using("clinic").filter(invoiceno=invoiceno)
+            if details:
+                invoice_item["invoice_details"] = details.first()
+            invoice = ClinicModels.Invoices.objects.using("clinic").filter(invoiceno=invoiceno)
+            if invoice:
+                invoice_item["invoice"] = invoice.first()
+
+        if invoice.first():
+            if ManagerModels.Transaction.objects.filter(reference_no=invoice.first().invoiceno):
+                invoice_item["recorded"] = True
+            else:
+                invoice_item["recorded"] = False
+        invoices.append(invoice_item)
+
+    return invoices
