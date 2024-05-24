@@ -102,9 +102,13 @@
             </section>
             <hr>
             {% if invoice.recorded == False %}
-            <form action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post" style="display: grid;gap: 2rem;grid-template-columns: repeat(1, 1fr);margin-bottom: 5rem;">
+            <form action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post" style="display: grid;gap: 1rem;grid-template-columns: 0.5fr 2fr;margin-bottom: 5rem;">
                 {% csrf_token %}
                 <!-- <input type="submit" value="Decline invoice" name="suspend_acount" class="btn btn-danger"> -->
+                <div style="display: flex;gap: 1rem;align-items: center;">
+                    <span class="title">Discount(%): </span>
+                    <input type="number" name="current_discount" id="discount" min="0" max="100" value="5" style="padding: .5rem 1rem;">
+                </div>
                 <input type="submit" value="Approve Invoice" name="activate_acount" class="btn btn-success">
             </form>
             {% endif %}

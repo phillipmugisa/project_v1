@@ -121,12 +121,16 @@ class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
         invoice = invoices[0]
         member = invoice["member"]
 
+        current_discount
+        
+        total_amount = float(invoice["invoice"].amountpaid) * (100 - int(request.POST.get("current_discount"))) / 100
+
         # record in our db
         transaction = ManagerModels.Transaction.objects.create(
             reference_no=invoice["invoice"].invoiceno,
             member = member,
             scheme=scheme,
-            amount_used = invoice["invoice"].amountpaid,
+            amount_used = total_amount,
             discount=0,
             reason=f"Payment for Member: {member.patient}",
             completed=True,
@@ -1007,8 +1011,9 @@ def clone_patient(cm_patient, commit=True):
 
 def notify_principle(request, subject, scheme, transaction, message):
     # send email to scheme principle
-    send_email(request, subject, scheme, transaction, message)
-    send_sms(request, subject, scheme, transaction, message)
+    # send_email(request, subject, scheme, transaction, message)
+    # send_sms(request, subject, scheme, transaction, message)
+    print("NOTIFICATIONS TURNED OFF")
 
 def send_sms(request, subject, scheme, transaction, message):
     principals = ManagerModels.FamilyMember.objects.filter(scheme=scheme, relationship__name__icontains="princi")
