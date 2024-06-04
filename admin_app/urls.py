@@ -16,6 +16,9 @@ urlpatterns = [
     path("schemes/create", AdminAppViews.SchemeCreateView.as_view(), name="create-scheme"),
     path("schemes/<int:insurance_number>/patient/<int:patientno>/", AdminAppViews.SchemmePatientView.as_view(), name="scheme-patient"),
 
+    path("confirm-opt/", AdminAppViews.ConfirmActionView.as_view(), name="confirm-operation"),
+    
+
 
     path("patient/<int:patientno>/", AdminAppViews.PatientDetails.as_view(), name="patient-details"),
     path("patient/<int:patientno>/membership/", AdminAppViews.PatientMembershipDetails.as_view(), name="patient-membership"),

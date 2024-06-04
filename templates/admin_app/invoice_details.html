@@ -32,29 +32,23 @@
                         <span style="font-weight: 700;">Invoice Number:</span> <span>{{ invoice.invoice.invoiceno }}</span>
                     </p>
                     <p style="display: flex; gap: 1rem;">
-                        <span style="font-weight: 700;">Amount:</span> <span>{{ invoice.invoice.amount }}</span>
-                    </p>
-                    <p style="display: flex; gap: 1rem;">
-                        <span style="font-weight: 700;">Amount Paid:</span> <span>{{ invoice.invoice.amountpaid }}</span>
-                    </p>
-                    <p style="display: flex; gap: 1rem;">
-                        <span style="font-weight: 700;">Amount Words:</span> <span>{{ invoice.invoice.amountwords }}</span>
-                    </p>
-                    <p style="display: flex; gap: 1rem;">
                         <span style="font-weight: 700;">Invoice Date:</span> <span>{{ invoice.invoice.invoicedate }}</span>
                     </p>
                     <p style="display: flex; gap: 1rem;">
                         <span style="font-weight: 700;">Visit Number:</span> <span>{{ invoice.visit.visitno }}</span>
                     </p>
-                    <p style="display: flex; gap: 1rem;">
+                    <p style="display: flex; gap: 1rem;" id="patient-details" data-patientno="{{invoice.member.patient.patientno}}" data-scheme="{{invoice.member.scheme.pk}}">
                         <span style="font-weight: 700;">Member:</span> <span>{{ invoice.member.patient }}</span>
+                    </p>
+                    <p style="display: flex; gap: 1rem;align-items: center;font-weight: 700;font-size: 1.4rem;">
+                        <span>Amount:</span> <span id="total_amount">{{ invoice.invoice.amount }}</span>
                     </p>
                 </div>
             </section>
 
             <hr>
             
-            <section class="grid table-area">
+            <section class="grid table-area" style="margin-bottom: 0;">
                 <header>
                     <h3 class="title">Services/Items</h3>
                 </header>
@@ -68,32 +62,28 @@
                             <th>Quantity</th>
                             <th>Unit Cost</th>
                             <th>Unit Price</th>
-                            <th>Discount</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for service in invoice.services %}
-                        <tr>
-                            <td>
+                        <tr class="service-row">
+                            <td data-visitno="{{service.visitno.visitno}}">
                                 {{ service.visitno.visitno }}
                             </td>
-                            <td>
+                            <td data-itemcode="{{service.itemcode}}">
                                 {{ service.itemcode }}
                             </td>
-                            <td>
+                            <td data-itemname="{{service.itemname}}">
                                 {{ service.itemname }}
                             </td>
-                            <td>
-                                {{ service.quantity }}
+                            <td data-quantity="{{service.quantity}}">
+                                <input type="number" style="padding: 0.25rem 0.5rem;" data-parent-name="quantity" value="{{ service.quantity }}" id="">
                             </td>
-                            <td>
-                                {{ service.unitcost }}
+                            <td data-unitcost="{{service.unitcost}}">
+                                <input type="number" style="padding: 0.25rem 0.5rem;" data-parent-name="unitcost" value="{{ service.unitcost }}" id="">
                             </td>
-                            <td>
-                                {{ service.unitprice }}
-                            </td>
-                            <td>
-                                {{ service.discount }}
+                            <td data-unitprice="{{service.unitprice}}">
+                                <input type="number" style="padding: 0.25rem 0.5rem;" data-parent-name="unitprice" value="{{ service.unitprice }}" id="">
                             </td>
                         </tr>
                         {% endfor %}
@@ -102,14 +92,14 @@
             </section>
             <hr>
             {% if invoice.recorded == False %}
-            <form action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post" style="display: grid;gap: 1rem;grid-template-columns: 0.5fr 2fr;margin-bottom: 5rem;">
+            <form id="approve_invoice_form" action="{% url 'admin_app:scheme-invoices-details' scheme.insurance_number invoice.invoice.invoiceno %}" method="post" style="display: grid;gap: 1rem;grid-template-columns: 0.5fr 2fr;margin-bottom: 5rem;">
                 {% csrf_token %}
                 <!-- <input type="submit" value="Decline invoice" name="suspend_acount" class="btn btn-danger"> -->
                 <div style="display: flex;gap: 1rem;align-items: center;">
                     <span class="title">Discount(%): </span>
                     <input type="number" name="current_discount" id="discount" min="0" max="100" value="5" style="padding: .5rem 1rem;">
                 </div>
-                <input type="submit" value="Approve Invoice" name="activate_acount" class="btn btn-success">
+                <input type="submit" value="Approve Invoice" id="approve_invoice" name="activate_acount" class="btn btn-success">
             </form>
             {% endif %}
         {% endfor %}
@@ -118,5 +108,130 @@
 
 <script>
     $(`#services-list`).DataTable()
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const getServices = () => {
+            let services = []
+            document.querySelectorAll(".service-row").forEach(row => {
+                let service_item = {}
+                row.querySelectorAll("td").forEach(td => {
+                    if (td.getAttribute("data-visitno")) {
+                        service_item["visitno"] = td.getAttribute("data-visitno")
+                    }
+                    if (td.getAttribute("data-itemcode")) {
+                        service_item["itemcode"] = td.getAttribute("data-itemcode")
+                    }
+                    if (td.getAttribute("data-itemname")) {
+                        service_item["itemname"] = td.getAttribute("data-itemname")
+                    }
+                    if (td.getAttribute("data-quantity")) {
+                        service_item["quantity"] = td.getAttribute("data-quantity")
+                    } else if (td.getAttribute("data-quantity") == ""){
+                        service_item["quantity"] = 0
+                    }
+                    if (td.getAttribute("data-unitcost")) {
+                        service_item["unitcost"] = td.getAttribute("data-unitcost")
+                    }
+                    if (td.getAttribute("data-unitprice")) {
+                        service_item["unitprice"] = td.getAttribute("data-unitprice")
+                    }
+                })
+
+                service_item["total_price"] = parseFloat(service_item["quantity"]) * parseFloat(service_item["unitprice"])
+                services.push(service_item)
+            })
+            return services
+        }
+
+        const getSum = () => {
+            let services = getServices()
+            let total_amount = 0
+            for (let i=0; i < services.length; i++) {
+                total_amount = total_amount + services[i]["total_price"]
+            }
+            return total_amount
+        }
+
+        const displaysum = () => {
+            let total_amount = getSum()
+            // apply discount
+            let discount = document.querySelector("#discount").value
+            if (discount == "" || isNaN(discount)) {
+                discount = 0
+            }
+            total_amount = total_amount * (100 - discount) / 100
+
+            document.querySelector("#total_amount").textContent = total_amount
+        }
+        displaysum()
+
+        // watch for data change
+        document.querySelectorAll("table input").forEach(elem => elem.addEventListener("keyup", () => {
+            elem.parentElement.setAttribute(`data-${elem.dataset.parentName}`, elem.value)
+            // update sum
+            displaysum()
+        }))
+        document.querySelector("#discount").addEventListener("keyup", () => displaysum())
+        document.querySelector("#approve_invoice_form").addEventListener("submit", e => {
+            e.preventDefault()
+
+            
+            if (confirm('Confirm your operation')) {
+                let data = {
+                    "patient": {
+                        "patientno": document.querySelector("#patient-details").getAttribute("data-patientno"),
+                        "scheme": document.querySelector("#patient-details").getAttribute("data-scheme"),
+                    },
+                    "services": getServices(),
+                    "total_amount": getSum(),
+                    "patient_type": "Not Specified",
+                    "discount": document.querySelector("#discount").value
+                }
+
+                const payload = {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': "{{ csrf_token }}"  // Ensure you have a function to retrieve CSRF token
+                    },
+                    body: JSON.stringify(data)
+                };
+
+                // Send the data to Django view
+                fetch('{% url "admin_app:pos" %}', payload)
+                .then(response => {
+                    if (!response.ok) {
+                        response.json()
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error)
+                    }
+                    else {
+                        alert("Operation successful")
+                        
+                        // redirect
+                        let link = document.createElement("a")
+                        link.href = `{% url 'admin_app:transactions' %}?ref=${data.transaction_ref}`
+                        link.style.display = "none"
+                        link.target = "_blank"
+                        document.body.appendChild(link)
+                        link.click()
+
+                        window.location.reload()
+                    }
+                    return
+                })
+                // .catch(error => {
+                //     // Handle network errors or other issues
+                //     alert("Unable to reach server")
+                //     return
+                // });
+            }
+        })
+    })
 </script>
 {% endblock %}

@@ -477,3 +477,7 @@ form .errorlist li {
 .pos-view .body .body-part {
     padding: .5rem;
 }
+
+table input {
+    padding-inline: .5rem;
+}

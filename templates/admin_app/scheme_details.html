@@ -9,15 +9,15 @@
                 <a href="" hx-get="{% url 'admin_app:scheme-edit' scheme.insurance_number %}" hx-target="#swappable" hx-indicator=".loader"  class="btn btn-success">Edit Account</a>
                 <a href="{% url 'admin_app:scheme-invoices' scheme.insurance_number %}" class="btn btn-success">View Invoices</a>
                 <a href="{% url 'admin_app:scheme-statement' scheme.insurance_number %}" class="btn btn-success">Excel Statement</a>
-                <form hx-post="{% url 'admin_app:scheme-details' scheme.insurance_number %}" hx-target="#app-wrapper" hx-indicator=".loader">
-                    {% csrf_token %}
-                    {% if scheme.status %}
-                        <input type="submit" value="Suspend Account" name="suspend_acount" class="btn btn-danger">
-                    {% else %}
-                        <input type="submit" value="Activate Account" name="activate_acount" class="btn btn-success">
-                    {% endif %}
-                </form>
-                <a href="{% url 'admin_app:scheme-delete' scheme.insurance_number %}" class="btn btn-danger">Delete Account</a>
+                
+                {% if scheme.status %}
+                <a href="{% url 'admin_app:confirm-operation' %}?next={% url 'admin_app:scheme-details' scheme.insurance_number %}?action=suspend" class="btn btn-danger">Suspend Account</a>
+                {% else %}
+                <a href="{% url 'admin_app:confirm-operation' %}?next={% url 'admin_app:scheme-details' scheme.insurance_number %}?action=activate" class="btn btn-success">Activate Account</a>
+                {% endif %}
+
+                
+                <a href="{% url 'admin_app:confirm-operation' %}?next={% url 'admin_app:scheme-delete' scheme.insurance_number %}" class="btn btn-danger">Delete Account</a>
             </div>
         </div>
         <div id="swappable" class="grid">

@@ -140,11 +140,6 @@
                 }
                 else {
                     alert("Operation successful")
-
-                    console.log(data)
-                    console.log(data.transaction_ref)
-                    console.log(`{% url 'admin_app:transactions' %}?ref=${data.transaction_ref}`)
-                    
                     // redirect
                     let link = document.createElement("a")
                     link.href = `{% url 'admin_app:transactions' %}?ref=${data.transaction_ref}`

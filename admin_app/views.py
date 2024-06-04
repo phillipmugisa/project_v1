@@ -48,11 +48,17 @@ class HomeView(AdminAndAuthenticatedAccessMixin, View):
         schemes = ManagerModels.Scheme.objects.filter(status=True).order_by("-id")
         transactions = ManagerModels.Transaction.objects.all()[:10]
 
-        for scheme in schemes:
-            total_credit = total_credit + scheme.credit
+        try:
+            for scheme in schemes:
+                total_credit = total_credit + scheme.credit
+        except:
+            pass
 
-        for transaction in transactions:
-            total_debit = total_debit + transaction.amount_used
+        try:
+            for transaction in transactions:
+                total_debit = total_debit + transaction.amount_used
+        except:
+            pass
 
         self.context_data["total_credit"] = total_credit
         self.context_data["total_debit"] = total_debit
@@ -140,7 +146,7 @@ class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
         )
         
         try:
-            for service in invoice["services"]:                
+            for service in invoice["services"]:
                 service_record = ManagerModels.Service.objects.filter(Q(code__iexact=service.itemcode) | Q(name__iexact=service.itemname))
                 if not service_record:
                     service = ManagerModels.Service.objects.create(
@@ -149,7 +155,6 @@ class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
                         price=service.unitprice,
                     )
                 else:
-                    print(service_record)
                     service = service_record.first()
 
                 ManagerModels.TransactionService.objects.create(
@@ -179,14 +184,20 @@ class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
     def get(self, request):
         total_credit = 0
         total_debit = 0
-        schemes = ManagerModels.Scheme.objects.filter(status=True).order_by("-id")
+        schemes = ManagerModels.Scheme.objects.all().order_by("-id")
         transactions = ManagerModels.Transaction.objects.all()[:10]
 
-        for scheme in schemes:
-            total_credit = total_credit + scheme.credit
+        try:
+            for scheme in schemes:
+                total_credit = total_credit + scheme.credit
+        except:
+            pass
 
-        for transaction in transactions:
-            total_debit = total_debit + transaction.amount_used
+        try:
+            for transaction in transactions:
+                total_debit = total_debit + transaction.amount_used
+        except:
+            pass
 
         self.context_data["total_credit"] = total_credit
         self.context_data["total_debit"] = total_debit
@@ -208,10 +219,28 @@ class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
 
 
 class SchemeDeleteView(AdminAndAuthenticatedAccessMixin, View):
-    def get(self, request, insurance_number):
+    def post(self, request, insurance_number):
         scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
         scheme.delete()
         return redirect(reverse("admin_app:schemes"))
+
+class ConfirmActionView(AdminAndAuthenticatedAccessMixin, View):
+
+    template_name = "admin_app/utils/confirm.html"
+    context_data = {}
+
+    def get(self, request):
+        next_url = request.GET.get("next", None)
+        if not next_url:
+            return HttpResponseNotFound()
+
+        self.context_data["next_url"] = next_url
+
+        return render(request, template_name=self.template_name, context=self.context_data)
+        
+    def post(self, request):
+        if request.POST.get("cancel"):
+            return redirect(reverse("admin_app:home"))
 
 class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/scheme_details.html"
@@ -226,8 +255,12 @@ class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
         transactions = ManagerModels.Transaction.objects.filter(scheme=scheme)
         self.context_data["transactions"] = transactions
 
-        for transaction in transactions:
-            total_debit = total_debit + transaction.amount_used
+        try:
+            for transaction in transactions:
+                total_debit = total_debit + transaction.amount_used
+        except:
+            pass
+
         self.context_data["total_debit"] = total_debit
 
         members = ManagerModels.FamilyMember.objects.filter(scheme=scheme)
@@ -241,6 +274,19 @@ class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
         scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
         self.context_data["scheme"] = scheme
 
+
+        
+        if request.GET.get("action", None) == "suspend":
+            scheme.status = False
+            scheme.save()
+            return redirect(reverse("admin_app:schemes"))
+        
+        if request.GET.get("action", None) == "activate":
+            scheme.status = True
+            scheme.save()
+            return redirect(reverse("admin_app:schemes"))
+
+        
         if request.POST.get("suspend_acount"):
             scheme.status = False
             scheme.save()
@@ -250,6 +296,7 @@ class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
             scheme.status = True
             scheme.save()
             return redirect(reverse("admin_app:scheme-details", args=[insurance_number]))
+
 
         patient_data = request.POST.get("search-keyword")
         if not patient_data:
@@ -877,12 +924,25 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
         
         try:
             for service in json_data.get("services"):
-                
-                service = ManagerModels.Service.objects.filter(id=service.get("id"), code=service.get("code"))
-                if not service:
-                    response_data = {'error': 'Invalid data provided'}
-                    return JsonResponse(response_data)
-                service = service.first()
+                if service.get("itemcode") or service.get("itemname"):
+                    # from invoice approve
+                    service_record = ManagerModels.Service.objects.filter(Q(code__iexact=service.get("itemcode")) | Q(name__iexact=service.get("itemname")))
+                    if not service_record:
+                        service = ManagerModels.Service.objects.create(
+                            code=service.itemcode,
+                            name=service.itemname,
+                            price=service.unitprice,
+                        )
+                    else:
+                        service = service_record.first()
+                else:
+                    # from pos
+                    service = ManagerModels.Service.objects.filter(id=service.get("id"), code=service.get("code"))
+                    if not service:
+                        response_data = {'error': 'Invalid data provided'}
+                        transaction.delete()
+                        return JsonResponse(response_data)
+                    service = service.first()
 
                 ManagerModels.TransactionService.objects.create(
                     service = service,
@@ -892,7 +952,8 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
                 # reduce scheme credit
                 scheme.credit = scheme.credit - service.price
                 scheme.save()
-        except:
+        except Exception as err:
+            print(err)
             transaction.delete()
             response_data = {'error': 'Error processing data'}
             return JsonResponse(response_data)
@@ -1013,7 +1074,7 @@ def notify_principle(request, subject, scheme, transaction, message):
     # send email to scheme principle
     # send_email(request, subject, scheme, transaction, message)
     # send_sms(request, subject, scheme, transaction, message)
-    print("NOTIFICATIONS TURNED OFF")
+    print("\n\n NOTIFICATIONS TURNED OFF \n\n")
 
 def send_sms(request, subject, scheme, transaction, message):
     principals = ManagerModels.FamilyMember.objects.filter(scheme=scheme, relationship__name__icontains="princi")
