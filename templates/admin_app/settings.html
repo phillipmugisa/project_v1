@@ -1,0 +1,77 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<style>
+    .grid {
+        display: grid;
+    }
+    
+    .flex {
+        display: flex;
+    }
+    .Settings {
+        height: 80vh;
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        color: rgb(53, 53, 53)
+    }
+    form > div > label{
+        font-size: 1.2rem;
+    }
+    form > div {
+        align-items: center;
+    }
+</style>
+<main class="grid Settings">
+    <form action="{% url 'admin_app:app-settings' %}" class="grid" style="gap: 1.5rem" method="POST">
+        {% csrf_token %}
+        <div class="flex" style="gap: 1rem;">
+            <label for="">SMS</label>
+            <div class="flex" style="gap: 1rem;">
+                <input type="radio" name="sms_status" id="sms_enabled" value="sms_enabled" {% if app_settings.sms_enabled %} checked {% endif %}>
+                <label for="sms_enabled">Enable</label>
+            </div>
+            <div class="flex" style="gap: 1rem;">
+                <input type="radio" name="sms_status" id="sms_disabled" value="sms_disabled" {% if not app_settings.sms_enabled %} checked {% endif %}>
+                <label for="sms_disabled">Disable</label>
+            </div>
+            
+            <div class="flex" style="gap: 1rem;">
+                <p style="font-weight: bold;">Status:</p>
+                {%  if app_settings.sms_enabled %}
+                <p style="font-weight: bold;color: greenyellow;">Enabled</p>
+                {% else %}
+                <p style="font-weight: bold;color: red;">Disabled</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex" style="gap: 1rem;">
+            <label for="">Email</label>
+            <div class="flex" style="gap: 1rem;">
+                <input type="radio" name="email_status" id="email_enabled" value="email_enabled" {% if app_settings.email_enabled %} checked {% endif %}>
+                <label for="email_enabled">Enable</label>
+            </div>
+            <div class="flex" style="gap: 1rem;">
+                <input type="radio" name="email_status" id="email_disabled" value="email_disabled" {% if not app_settings.email_enabled %} checked {% endif %}>
+                <label for="email_disabled">Disable</label>
+            </div>
+            
+            <div class="flex" style="gap: 1rem;">
+                <p style="font-weight: bold;">Status:</p>
+                <p style="font-weight: bold;">Status:</p>
+                {%  if app_settings.email_enabled %}
+                <p style="font-weight: bold;color: greenyellow;">Enabled</p>
+                {% else %}
+                <p style="font-weight: bold;color: red;">Disabled</p>
+                {% endif %}
+            </div>
+        </div>
+        <input class="btn btn-primary" type="submit" value="Save Changes">
+    </form>
+    <div style="display: flex;gap: 1rem;font-size: 1.2rem;">
+        <b><span>Subscription Information: </span></b>
+        <span>Valid till {{app_settings.expiration_date}}</span>
+    </div>
+    <b><a href="{% url 'auth_app:profile' %}">Change Password</a></b>
+</main>
+{% endblock %}

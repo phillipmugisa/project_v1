@@ -130,7 +130,7 @@ class FamilyMember(models.Model):
 
 
     def __str__(self):
-        return f"({self.scheme.name}) {self.patient.firstname} {self.patient.lastname}"
+        return f"{self.patient.firstname} {self.patient.lastname}"
 
 class AccessType(models.Model):
     name = models.CharField(verbose_name="Name", max_length=256)
@@ -177,6 +177,8 @@ class Transaction(models.Model):
 class TransactionService(models.Model):
     transaction = models.ForeignKey(to=Transaction, on_delete=models.SET_NULL, null=True)
     service = models.ForeignKey(to=Service, on_delete=models.SET_NULL, null=True)
+    quantity = models.IntegerField(default=1)
+    amount = models.DecimalField(decimal_places=2, max_digits=12, blank=True, null=True)
     created_on = models.DateField(_("Created on"), default=timezone.now)
 
 class Scheme(models.Model):
@@ -220,3 +222,10 @@ class Log(models.Model):
     action = models.CharField(verbose_name="actions", max_length=256)
     reason = models.CharField(verbose_name="reason", max_length=256, null=True, blank=True)
     created_on = models.DateField(_("Created on"), default=timezone.now)
+
+
+class AppSettings(models.Model):
+    sms_enabled = models.BooleanField(default=False)
+    email_enabled = models.BooleanField(default=False)
+    activation_date = models.DateField(_("Activated on"), null=True, blank=True)
+    expiration_date = models.DateField(_("expires on"), null=True, blank=True)

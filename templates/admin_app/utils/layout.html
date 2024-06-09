@@ -33,6 +33,7 @@
         <div class="tabs right-tabs grid">
             <p class="tab btn text-success">Logged in as {{request.user.username}}</p>
             <a class="tab btn" href="{% url 'auth_app:profile' %}">Profile</a>
+            <a class="btn tab" href="{% url 'admin_app:app-settings' %}">Settings</a>
             <a class="tab btn btn-primary" href="{% url 'auth_app:logout' %}">Logout</a>
         </div>
     </nav>

@@ -29,7 +29,7 @@
                 <hr>
                 <div style="display: grid; gap: 1rem;grid-template-columns: repeat(2, 1fr);">
                     <p style="display: flex; gap: 1rem;">
-                        <span style="font-weight: 700;">Invoice Number:</span> <span>{{ invoice.invoice.invoiceno }}</span>
+                        <span style="font-weight: 700;">Invoice Number:</span> <span id="invoice_refno">{{ invoice.invoice.invoiceno }}</span>
                     </p>
                     <p style="display: flex; gap: 1rem;">
                         <span style="font-weight: 700;">Invoice Date:</span> <span>{{ invoice.invoice.invoicedate }}</span>
@@ -101,6 +101,10 @@
                 </div>
                 <input type="submit" value="Approve Invoice" id="approve_invoice" name="activate_acount" class="btn btn-success">
             </form>
+            {% else %}
+            <div style="margin-bottom: 5rem;">
+                <a target="_blank" class="btn btn-success" href="{% url 'admin_app:transactions' %}?ref={{invoice.invoice.invoiceno}}">View/Print Recipt</a>
+            </div>
             {% endif %}
         {% endfor %}
     </div>
@@ -138,6 +142,7 @@
                 })
 
                 service_item["total_price"] = parseFloat(service_item["quantity"]) * parseFloat(service_item["unitprice"])
+                service_item["quantity"] = parseFloat(service_item["quantity"])
                 services.push(service_item)
             })
             return services
@@ -185,7 +190,8 @@
                     "services": getServices(),
                     "total_amount": getSum(),
                     "patient_type": "Not Specified",
-                    "discount": document.querySelector("#discount").value
+                    "discount": document.querySelector("#discount").value,
+                    "invoice_no": document.querySelector("#invoice_refno").textContent
                 }
 
                 const payload = {

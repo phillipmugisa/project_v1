@@ -81,7 +81,9 @@
                 <tr>
                     <th>Count</th>
                     <th>Service</th>
-                    <th>Amount</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Price</th>
                 </tr>
             </thead>
             <tbody>
@@ -89,7 +91,9 @@
                 <tr>
                     <td>{{ forloop.counter }}</td>
                     <td>{{ service.service.name }}</td>
+                    <th>{{ service.quantity }}</th>
                     <td>{{ service.service.price }}</td>
+                    <td>{{ service.amount }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

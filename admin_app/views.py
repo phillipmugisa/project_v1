@@ -242,6 +242,43 @@ class ConfirmActionView(AdminAndAuthenticatedAccessMixin, View):
         if request.POST.get("cancel"):
             return redirect(reverse("admin_app:home"))
 
+    
+class SettingsView(AdminAndAuthenticatedAccessMixin, View):
+
+    template_name = "admin_app/settings.html"
+    context_data = {}
+
+    def get(self, request):
+        app_settings = ManagerModels.AppSettings.objects.all()
+        if not app_settings:
+            app_settings = ManagerModels.AppSettings.objects.create()
+        else:
+            app_settings = app_settings.first()
+        self.context_data["app_settings"] = app_settings
+
+        return render(request, template_name=self.template_name, context=self.context_data)
+        
+    def post(self, request):
+        app_settings = ManagerModels.AppSettings.objects.all()
+        if not app_settings:
+            app_settings = ManagerModels.AppSettings.objects.create()
+        else:
+            app_settings = app_settings.first()
+
+        if request.POST.get("sms_status") == "sms_enabled":
+            app_settings.sms_enabled = True
+        else:
+            app_settings.sms_enabled = False
+
+        if request.POST.get("email_status") == "email_enabled":
+            app_settings.email_enabled = True
+        else:
+            app_settings.email_enabled = False
+
+        app_settings.save()
+        
+        return redirect(reverse("admin_app:app-settings"))
+
 class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/scheme_details.html"
     template_partial_patient_list = "admin_app/partials/__patients_list.html"
@@ -911,7 +948,7 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
         total_amount = json_data.get("total_amount") * (100 - int(json_data.get("discount"))) / 100
 
         # create transaction
-        transaction = ManagerModels.Transaction.objects.create(
+        transaction = ManagerModels.Transaction(
             member = member,
             scheme=scheme,
             amount_used = total_amount,
@@ -921,23 +958,28 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
             authorised=True,
             patient_type=json_data.get("patient_type")
         )
+
+        if json_data.get("invoice_no", None):
+            transaction.reference_no = json_data.get("invoice_no")
+
+        transaction.save()
         
         try:
-            for service in json_data.get("services"):
-                if service.get("itemcode") or service.get("itemname"):
+            for service_item in json_data.get("services"):
+                if service_item.get("itemcode") or service_item.get("itemname"):
                     # from invoice approve
-                    service_record = ManagerModels.Service.objects.filter(Q(code__iexact=service.get("itemcode")) | Q(name__iexact=service.get("itemname")))
+                    service_record = ManagerModels.Service.objects.filter(Q(code__iexact=service_item.get("itemcode")) | Q(name__iexact=service_item.get("itemname")))
                     if not service_record:
                         service = ManagerModels.Service.objects.create(
-                            code=service.itemcode,
-                            name=service.itemname,
-                            price=service.unitprice,
+                            code=service_item.get("itemcode"),
+                            name=service_item.get("itemname"),
+                            price=decimal.Decimal(service_item.get("unitprice")),
                         )
                     else:
                         service = service_record.first()
                 else:
                     # from pos
-                    service = ManagerModels.Service.objects.filter(id=service.get("id"), code=service.get("code"))
+                    service = ManagerModels.Service.objects.filter(id=service_item.get("id"), code=service_item.get("code"))
                     if not service:
                         response_data = {'error': 'Invalid data provided'}
                         transaction.delete()
@@ -946,11 +988,13 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
 
                 ManagerModels.TransactionService.objects.create(
                     service = service,
-                    transaction = transaction
+                    transaction = transaction,
+                    quantity=int(service_item.get("quantity")) if service_item.get("quantity", None) else 1,
+                    amount=int(service_item.get("quantity")) * service.price if service_item.get("quantity", None) else service.price
                 )
 
                 # reduce scheme credit
-                scheme.credit = scheme.credit - service.price
+                scheme.credit = scheme.credit - decimal.Decimal(service.price)
                 scheme.save()
         except Exception as err:
             print(err)
@@ -1071,9 +1115,19 @@ def clone_patient(cm_patient, commit=True):
     return patient
 
 def notify_principle(request, subject, scheme, transaction, message):
+    
+    app_settings = ManagerModels.AppSettings.objects.all()
+    if not app_settings:
+        app_settings = ManagerModels.AppSettings.objects.create()
+    else:
+        app_settings = app_settings.first()
+
     # send email to scheme principle
-    # send_email(request, subject, scheme, transaction, message)
-    # send_sms(request, subject, scheme, transaction, message)
+    # if app_settings.sms_enabled:
+        # send_sms(request, subject, scheme, transaction, message)
+    
+    # if app_settings.email_enabled:
+        # send_email(request, subject, scheme, transaction, message)
     print("\n\n NOTIFICATIONS TURNED OFF \n\n")
 
 def send_sms(request, subject, scheme, transaction, message):
