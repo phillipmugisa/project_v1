@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseForbidden
 from django.urls import reverse
 from django.views import View
 from django.http import HttpResponse
@@ -21,7 +21,7 @@ from django.core.mail import EmailMessage
 from manager import models as ManagerModels
 from clinicMas import models as ClinicModels
 from manager import forms as ManagerForms
-from admin_app.mixins import AdminAndAuthenticatedAccessMixin
+from admin_app.mixins import AdminAndAuthenticatedAccessMixin, SubscriptionActiveMixin
 
 import random, os
 from openpyxl import load_workbook, Workbook
@@ -35,7 +35,7 @@ import requests
 import urllib.parse
 
 
-class HomeView(AdminAndAuthenticatedAccessMixin, View):
+class HomeView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/index.html"
     template_partial_home = "admin_app/partials/__home.html"
 
@@ -78,7 +78,7 @@ class HomeView(AdminAndAuthenticatedAccessMixin, View):
         return render(request, template_name=self.template_partial_scheme_list, context=self.context_data)
 
 
-class SchemeInvoicesView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeInvoicesView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/invoices.html"
     context_data = {}
 
@@ -96,7 +96,7 @@ class SchemeInvoicesView(AdminAndAuthenticatedAccessMixin, View):
     def post(self, request):
         pass
 
-class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeInvoiceDetailView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/invoice_details.html"
     context_data = {}
 
@@ -174,7 +174,7 @@ class SchemeInvoiceDetailView(AdminAndAuthenticatedAccessMixin, View):
 
         return redirect(reverse("admin_app:scheme-invoices", args=[insurance_number]))
 
-class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeListView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/schemes.html"
     template_partial_home = "admin_app/partials/__home.html"
 
@@ -218,13 +218,13 @@ class SchemeListView(AdminAndAuthenticatedAccessMixin, View):
         return render(request, template_name=self.template_partial_scheme_list, context=self.context_data)
 
 
-class SchemeDeleteView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeDeleteView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     def post(self, request, insurance_number):
         scheme = get_object_or_404(ManagerModels.Scheme, insurance_number=insurance_number)
         scheme.delete()
         return redirect(reverse("admin_app:schemes"))
 
-class ConfirmActionView(AdminAndAuthenticatedAccessMixin, View):
+class ConfirmActionView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
 
     template_name = "admin_app/utils/confirm.html"
     context_data = {}
@@ -243,13 +243,14 @@ class ConfirmActionView(AdminAndAuthenticatedAccessMixin, View):
             return redirect(reverse("admin_app:home"))
 
     
-class SettingsView(AdminAndAuthenticatedAccessMixin, View):
+class SettingsView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
 
     template_name = "admin_app/settings.html"
     context_data = {}
 
     def get(self, request):
         app_settings = ManagerModels.AppSettings.objects.all()
+
         if not app_settings:
             app_settings = ManagerModels.AppSettings.objects.create()
         else:
@@ -279,7 +280,7 @@ class SettingsView(AdminAndAuthenticatedAccessMixin, View):
         
         return redirect(reverse("admin_app:app-settings"))
 
-class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeDetailsView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/scheme_details.html"
     template_partial_patient_list = "admin_app/partials/__patients_list.html"
     context_data = {}
@@ -352,7 +353,7 @@ class SchemeDetailsView(AdminAndAuthenticatedAccessMixin, View):
         self.context_data["patients"] = group_patients(patients)
         return render(request, template_name=self.template_partial_patient_list, context=self.context_data)
 
-class EditAccountView(AdminAndAuthenticatedAccessMixin, View):
+class EditAccountView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_partial_confirm_form = "admin_app/partials/__edit_scheme.html"
     template_partial_scheme_home = "admin_app/partials/__scheme_home_html"
     context_data = {}
@@ -384,7 +385,7 @@ class EditAccountView(AdminAndAuthenticatedAccessMixin, View):
             return redirect(reverse("admin_app:scheme-details", args=[insurance_number]))
 
 
-class SchemeTransactionStatementView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeTransactionStatementView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/partials/__scheme_home_html"
     context_data = {}
 
@@ -485,7 +486,7 @@ class SchemeTransactionStatementView(AdminAndAuthenticatedAccessMixin, View):
         return response
     
 
-class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
+class CreditAccountView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_partial_confirm_form = "admin_app/partials/__credit_scheme.html"
     template_partial_scheme_home = "admin_app/partials/__scheme_home_html"
     context_data = {}
@@ -558,7 +559,7 @@ class CreditAccountView(AdminAndAuthenticatedAccessMixin, View):
 
             return render(request, template_name=self.template_partial_scheme_home, context=self.context_data)
 
-class SchemmePatientView(AdminAndAuthenticatedAccessMixin, View):
+class SchemmePatientView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     def get(self, request, insurance_number, patientno):
         pass
 
@@ -639,7 +640,7 @@ class SchemmePatientView(AdminAndAuthenticatedAccessMixin, View):
             messages.add_message(request, messages.SUCCESS, _("Operation Successful"))
             return redirect(reverse("admin_app:scheme-details", args=[insurance_number]))
 
-class SchemeCreateView(AdminAndAuthenticatedAccessMixin, View):
+class SchemeCreateView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_partial_home = "admin_app/partials/__create_scheme.html"
     context_data = {}
 
@@ -729,7 +730,7 @@ def get_patient(request, patientno, commit=True):
 
     return patients.first(), True
 
-class PatientDetails(AdminAndAuthenticatedAccessMixin, View):
+class PatientDetails(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name = "admin_app/patient_details.html"
     template_partial_diodata = "admin_app/partials/__patient_biodata.html"
     context_data = {}
@@ -772,7 +773,7 @@ class PatientDetails(AdminAndAuthenticatedAccessMixin, View):
         return redirect(reverse("admin_app:patient-details", args=[patientno]))
 
 
-class PatientMembershipDetails(AdminAndAuthenticatedAccessMixin, View):
+class PatientMembershipDetails(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_partials_membership= "admin_app/partials/__patient_membership.html"
     context_data = {}
     
@@ -818,7 +819,7 @@ class PatientMembershipDetails(AdminAndAuthenticatedAccessMixin, View):
         return redirect(reverse("admin_app:patient-membership", args=[patientno]))
 
 
-class PatientPaymentView(AdminAndAuthenticatedAccessMixin, View):
+class PatientPaymentView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_partials_payment= "admin_app/partials/__make_payment.html"
     context_data = {}
     
@@ -854,7 +855,7 @@ class PatientPaymentView(AdminAndAuthenticatedAccessMixin, View):
         return redirect(reverse("admin_app:patient-membership", args=[patientno]))
 
 
-class ServicesView(AdminAndAuthenticatedAccessMixin, View):
+class ServicesView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name= "admin_app/services.html"
     context_data = {}
     def get(self, request):
@@ -918,7 +919,7 @@ class ServicesView(AdminAndAuthenticatedAccessMixin, View):
         return redirect(reverse("admin_app:services"))
 
 
-class POSView(AdminAndAuthenticatedAccessMixin, View):
+class POSView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name= "admin_app/pos.html"
     context_data = {}
     def get(self, request):
@@ -996,6 +997,39 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
                 # reduce scheme credit
                 scheme.credit = scheme.credit - decimal.Decimal(service.price)
                 scheme.save()
+
+            #     if json_data.get("invoice_approval", None):
+            #         # Invoicedetails
+            #             # invoiceno
+            #             # itemcode
+            #             # quantity
+            #             # amount
+            #         details = ClinicModels.Invoicedetails.objects.using("clinic").filter(invoiceno=json_data.get("invoice_no"), itemcode=service_item.get("itemcode"))
+            #         if details:
+            #             details = details.first()
+            #             details.quantity = int(service_item.get("quantity"))
+            #             details.amount = int(service_item.get("quantity"))
+            #             details.visittypeid = ClinicModels.Lookupdata.objects.using("clinic").last()
+            #             details.save()
+
+            # if json_data.get("invoice_approval", None):
+            #     # update clinic master invoice
+                
+            #     # Invoices
+            #         # invoiceno
+            #         # amount
+            #         # amountpaid
+
+            #     cm_invoice = ClinicModels.Invoices.objects.using("clinic").filter(invoiceno=json_data.get("invoice_no"))
+            #     if cm_invoice:
+            #         cm_invoice = cm_invoice.first()
+
+            #         cm_invoice.amount = total_amount
+            #         cm_invoice.amountpaid = total_amount
+            #         cm_invoice.paytypeid = ClinicModels.Lookupdata.objects.using("clinic").last()
+            #         cm_invoice.entrymodeid = ClinicModels.Lookupdata.objects.using("clinic").last()
+            #         cm_invoice.save()
+                        
         except Exception as err:
             print(err)
             transaction.delete()
@@ -1007,7 +1041,7 @@ class POSView(AdminAndAuthenticatedAccessMixin, View):
         response_data = {'message': 'Data received successfully', "transaction_ref": transaction.reference_no}
         return JsonResponse(response_data, status=200)
 
-class POSSchemePatientsView(AdminAndAuthenticatedAccessMixin, View):
+class POSSchemePatientsView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     __patient_partial_template = "admin_app/partials/__pos_patients_list.html"
     context_data = {}
     def get(self, request, insurance_number):
@@ -1022,7 +1056,7 @@ class POSSchemePatientsView(AdminAndAuthenticatedAccessMixin, View):
         return render(request, template_name=self.__patient_partial_template, context=self.context_data)
 
 
-class POSServicesView(AdminAndAuthenticatedAccessMixin, View):
+class POSServicesView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     __partial_template = "admin_app/partials/__pos_services_list.html"
     context_data = {}
     def post(self, request):
@@ -1036,7 +1070,7 @@ class POSServicesView(AdminAndAuthenticatedAccessMixin, View):
 
         return render(request, template_name=self.__partial_template, context=self.context_data)
     
-class POSSchemesView(AdminAndAuthenticatedAccessMixin, View):
+class POSSchemesView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     __partial_template = "admin_app/partials/__pos_schemes_list.html"
     context_data = {}
     def post(self, request):
@@ -1050,7 +1084,7 @@ class POSSchemesView(AdminAndAuthenticatedAccessMixin, View):
 
         return render(request, template_name=self.__partial_template, context=self.context_data)
 
-class TransactionsView(AdminAndAuthenticatedAccessMixin, View):
+class TransactionsView(SubscriptionActiveMixin, AdminAndAuthenticatedAccessMixin, View):
     template_name= "admin_app/transactions.html"
     receipt_template_name = "admin_app/transaction_receipt.html"
     context_data = {}
@@ -1071,6 +1105,12 @@ class TransactionsView(AdminAndAuthenticatedAccessMixin, View):
 
         return render(request, template_name=self.template_name, context=self.context_data)
 
+
+def InvalidSubscription(request):
+    if request.method == "GET":
+        return render(request, template_name="admin_app/utils/invalid-subscription.html")
+    else:
+        return HttpResponseForbidden()
 
 # utils
 def generate_insurance_no(family_name):

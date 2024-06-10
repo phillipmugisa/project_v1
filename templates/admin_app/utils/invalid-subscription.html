@@ -1,0 +1,35 @@
+{% extends "admin_app/utils/layout.html" %}
+{% block content %}
+<style>
+.confirm-view {
+    height: 80vh;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+}
+.confirm-view-form {
+    width: 40%;
+    background: hsl(189, 73%, 48%);;
+    display: grid;
+    gap: 1rem;
+    justify-content: center;
+    align-self: center;
+    padding: 2rem 0;
+}
+
+.confirm-view-form label {
+    font-size: 1.6rem;
+    color: white;
+}
+.confirm-view-form div {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+</style>
+<main class="grid confirm-view">
+    <div class="confirm-view-form" style="text-align: center;">
+        <label for="">Invalid/Expired subscription. Please contact support to renew subscription</label>
+    </div>
+</main>
+{% endblock %}

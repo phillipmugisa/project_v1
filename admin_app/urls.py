@@ -34,4 +34,5 @@ urlpatterns = [
     path("pos/schemes/", AdminAppViews.POSSchemesView.as_view(), name="pos-schemes"),
 
     path("transactions/", AdminAppViews.TransactionsView.as_view(), name="transactions"),
+    path("subscription/", AdminAppViews.InvalidSubscription, name="invalid-subscription"),
 ]
